@@ -122,30 +122,24 @@ const HomeState = (function() {
         store.clear();
         var len = pages.length;
 
+        //--------------------
         var tt = new Date().getTime();
 
-        for (var i = 0; i < len; i++) {
-          if (typeof pages[i] == 'object') {
-            for (var key in pages[i]) {
-              if (typeof pages[i][key] == 'object') {
-                for (var index in pages[i][key]) {
-                  console.log(
-                    'Luke: ' + tt +
-                    ' pages[' + i + '][' + key + '][' + index + '] = ' +
-                    JSON.stringify(pages[i][key][index])
-                  );
-                }
-              } else {
-                console.log(
-                  'Luke: ' + tt + ' pages[' + i + '][' + key + '] = ' +
-                  JSON.stringify(pages[i][key])
-                );
-              }
-            }
-          } else {
-            console.log('Luke: ' + tt + ' pages[' + i + '] = ' + pages[i]);
-          }
+        var sdcard = navigator.getDeviceStorage('sdcard');
+        var file = new Blob([JSON.stringify(pages)], {type: 'text/plain'});
 
+        var request = sdcard.addNamed(file, 'log-' + tt + '.txt');
+
+        request.onsuccess = function() {
+          var name = this.result.name;
+        };
+
+        request.onerror = function() {
+          console.warn('Unable to write the file: ' + this.error);
+        };
+        //--------------------
+
+        for (var i = 0; i < len; i++) {
           store.put(pages[i]);
         }
         if (success) {

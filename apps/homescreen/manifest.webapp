@@ -13,6 +13,7 @@
     "systemXHR":{},
     "settings":{ "access": "readwrite" },
     "device-storage:pictures":{ "access": "readonly" },
+    "device-storage:sdcard":{ "access": "readwrite" },
     "open-remote-window":{},
     "storage":{},
     "geolocation": {},
