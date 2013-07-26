@@ -1,0 +1,21 @@
+{
+  "name": "ChangJie IME",
+  "description": "ChangJie IME",
+  "type": "certified",
+  "launch_path": "/index.html",
+  "developer": {
+    "name": "The Gaia Team",
+    "url": "https://github.com/mozilla-b2g/gaia"
+  },
+  "icons": {
+    "120": "/style/icons/changjie.png"
+  },
+  "permissions": {
+    "backgroundservice":{},
+    "attention":{},
+    "contacts":{},
+    "settings":{ "access": "readwrite" },
+    "desktop-notification":{},
+    "device-storage:pictures":{ "access": "readwrite" }
+  }
+}
