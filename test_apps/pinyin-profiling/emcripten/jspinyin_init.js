@@ -17,7 +17,7 @@
     return date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ":" + date.getMilliseconds();
   }
 
-  function log(msg) {
+  /*function log(msg) {
     var parent = document.getElementById('log');
     if (parent.childNodes.length > 200) {
       parent.removeChild(parent.childNodes[0]);
@@ -26,6 +26,13 @@
     var logElem = document.createElement('div');
     logElem.textContent = getLoggerTime() + ": " + msg;
     parent.appendChild(logElem);
+  }*/
+
+  function log(msg) {
+    var divLog = document.getElementById('log');
+    var p = document.createElement('p');
+    p.innerHTML = getLoggerTime() + ' : ' + msg;
+    divLog.insertBefore(p, divLog.firstChild);
   }
 
   if (!Module['_main']) Module['_main'] = function() {
@@ -45,6 +52,28 @@
 
     document.getElementById('test').onclick = function() {
       test(document.getElementById('pinyin').value);
+    };
+
+    document.getElementById('test100').onclick = function() {
+      keyword = document.getElementById('pinyin').value;
+
+      try {
+        log('search 100 times keyword ' + keyword);
+
+        var startTime = new Date().getTime();
+        var size = 0;
+
+        for (var i = 0; i < 100; i++) {
+          im_reset_search();
+          size = im_search(keyword, keyword.length);
+        }
+
+        var endTime = new Date().getTime();
+
+        log('got ' + size + ' candidates, cost ' + (endTime - startTime) + ' milliseconds.');
+      } catch (e) {
+        log('error: ' + e);
+      }
     };
 
     window.test = function (keyword) {

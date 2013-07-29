@@ -12,8 +12,9 @@
   "permissions": {
     "backgroundservice":{},
     "attention":{},
-    "contacts":{},
-    "settings":{},
-    "desktop-notification":{}
+    "contacts":{ "access": "readwrite" },
+    "settings":{ "access": "readwrite" },
+    "desktop-notification":{},
+    "device-storage:pictures":{ "access": "readwrite" }
   }
 }
