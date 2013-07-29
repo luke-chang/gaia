@@ -5,7 +5,9 @@
     <title></title>
 </head>
 <body>
-    <p>PinyinIME test</p>
+    <h1>Emcripten Pinyin IME Test</h1>
+    <p style="margin-bottom: 1em;"><a href="../index.html">&lt;&lt; Back</a></p>
+
     <span id="status"></span>
     <br/>
     <input type="input" value="n" id="pinyin" />
@@ -26,7 +28,7 @@
         return '?' + Math.random();
       }
 
-      // chewing_files.js and chewing_init.js must be loaded before libchewing.js. 
+      // chewing_files.js and chewing_init.js must be loaded before libchewing.js.
       chewing_files = document.createElement('script');
       chewing_files.src = settings.path + '/empinyin_files.js' + r();
       head.appendChild(chewing_files);
