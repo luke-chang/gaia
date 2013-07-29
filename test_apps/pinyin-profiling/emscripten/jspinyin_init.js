@@ -54,23 +54,23 @@
       test(document.getElementById('pinyin').value);
     };
 
-    document.getElementById('test100').onclick = function() {
+    document.getElementById('test2').onclick = function() {
       keyword = document.getElementById('pinyin').value;
 
       try {
-        log('search 100 times keyword ' + keyword);
+        log('search ' + testRepeatCount + ' times keyword ' + keyword);
 
         var startTime = new Date().getTime();
         var size = 0;
 
-        for (var i = 0; i < 100; i++) {
+        for (var i = 0; i < testRepeatCount; i++) {
           im_reset_search();
           size = im_search(keyword, keyword.length);
         }
 
         var endTime = new Date().getTime();
 
-        log('got ' + size + ' candidates, cost ' + (endTime - startTime) + ' milliseconds.');
+        log('got ' + size + ' candidates, cost ' + (endTime - startTime) + 'ms, average ' + ((endTime - startTime) / testRepeatCount) + 'ms');
       } catch (e) {
         log('error: ' + e);
       }

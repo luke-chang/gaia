@@ -30,19 +30,19 @@ window.addEventListener('load', function() {
       delete candidates;
     };
 
-    document.getElementById('test100').onclick = function() {
+    document.getElementById('test2').onclick = function() {
       var startTime, endTime;
-      var result = new Array(100);
+      var result = new Array(testRepeatCount);
 
       startTime = new Date().getTime();
-      for(var i = 0; i < 100; i++) {
+      for(var i = 0; i < testRepeatCount; i++) {
         result[i] = PinyinDecoderService.search(document.getElementById('pinyin').value);
         PinyinDecoderService.resetSearch();
       }
       endTime = new Date().getTime();
 
       log('total cost: ' + (endTime - startTime) + 'ms');
-      log('average cost: ' + ((endTime - startTime) / 100) + 'ms');
+      log('average cost: ' + ((endTime - startTime) / testRepeatCount) + 'ms');
       log('length: ' + result[0]);
     };
 

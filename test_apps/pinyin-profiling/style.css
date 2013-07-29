@@ -1,0 +1,21 @@
+input[type="text"], input[type="input"] {
+  font-size: 1.5rem;
+}
+
+button, input[type="button"] {
+  width: 150px;
+  height: 40px;
+  font-size: 1.5rem;
+}
+
+#log {
+  margin-top: 1em;
+}
+
+p {
+  margin: 0.2em;
+}
+
+p.backBtn {
+  margin-bottom: 1em;
+}
