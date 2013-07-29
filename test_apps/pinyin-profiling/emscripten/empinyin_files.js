@@ -44,7 +44,7 @@ Module['FS_createPath']('/', 'data', true, true);
     var PACKAGE_PATH = window['encodeURIComponent'](window.location.pathname.toString().substring(0, window.location.pathname.toString().lastIndexOf('/')) + '/');
     var PACKAGE_NAME = 'empinyin_files.data';
     var REMOTE_PACKAGE_NAME = 'empinyin_files.data';
-    var PACKAGE_UUID = 'f44fb5ba-bc91-468c-bf36-7341ac3cdd46';
+    var PACKAGE_UUID = 'cbc44e89-8065-4da1-8990-9f0ba1cb4d3b';
   
     function fetchRemotePackage(packageName, callback, errback) {
       var xhr = new XMLHttpRequest();
