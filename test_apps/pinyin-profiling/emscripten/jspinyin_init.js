@@ -12,29 +12,6 @@
     Module['canvas'] = document.getElementById('canvas');
   }
 
-  function getLoggerTime() {
-    var date = new Date();
-    return date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ":" + date.getMilliseconds();
-  }
-
-  /*function log(msg) {
-    var parent = document.getElementById('log');
-    if (parent.childNodes.length > 200) {
-      parent.removeChild(parent.childNodes[0]);
-    }
-
-    var logElem = document.createElement('div');
-    logElem.textContent = getLoggerTime() + ": " + msg;
-    parent.appendChild(logElem);
-  }*/
-
-  function log(msg) {
-    var divLog = document.getElementById('log');
-    var p = document.createElement('p');
-    p.innerHTML = getLoggerTime() + ' : ' + msg;
-    divLog.insertBefore(p, divLog.firstChild);
-  }
-
   if (!Module['_main']) Module['_main'] = function() {
     var im_open_decoder = Module.cwrap('im_open_decoder', 'number', ['string', 'string']);
     var im_reset_search = Module.cwrap('im_reset_search', '', []);
@@ -70,7 +47,9 @@
 
         var endTime = new Date().getTime();
 
-        log('got ' + size + ' candidates, cost ' + (endTime - startTime) + 'ms, average ' + ((endTime - startTime) / testRepeatCount) + 'ms');
+        log('total cost: ' + (endTime - startTime) + 'ms');
+        log('average cost: ' + ((endTime - startTime) / testRepeatCount) + 'ms');
+        log('length: ' + size);
       } catch (e) {
         log('error: ' + e);
       }
@@ -91,7 +70,8 @@
 
         var endTime = new Date().getTime();
 
-        log('got ' + size + ' candidates, cost ' + (endTime - startTime) + ' milliseconds.');
+        log('total cost: ' + (endTime - startTime) + 'ms');
+        log('length: ' + size);
 
         var candidates = '';
         for (var i = 0; i < size; i++) {

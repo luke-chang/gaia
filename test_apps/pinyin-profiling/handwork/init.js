@@ -46,21 +46,9 @@ window.addEventListener('load', function() {
       log('length: ' + result[0]);
     };
 
-    document.getElementById('clear').onclick = function() {
+    /*document.getElementById('clear').onclick = function() {
       document.getElementById('log').innerHTML = '';
-    }
+    }*/s
   };
   document.getElementsByTagName('head')[0].appendChild(script_files);
-
-  function getLoggerTime() {
-    var date = new Date();
-    return date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ":" + date.getMilliseconds();
-  }
-
-  function log(msg) {
-    var divLog = document.getElementById('log');
-    var p = document.createElement('p');
-    p.innerHTML = getLoggerTime() + ' : ' + msg;
-    divLog.insertBefore(p, divLog.firstChild);
-  }
 });
