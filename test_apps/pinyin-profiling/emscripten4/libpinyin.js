@@ -2384,43 +2384,22 @@ function copyTempDouble(ptr) {
     }
 
   function _qsort2(base, num, size, cmp) {
-      if (num == 0 || size == 0) return;
       // forward calls to the JavaScript sort method
       // first, sort the items logically
-
       var keys = [];
-      var maxLength = 0;
 
       for (var i = 0; i < num; i++) {
-        var idx = HEAP32[(base + i * size) >> 2];
-        keys.push(idx);
-        //if(idx.length > maxLength) maxLength = idx.length;
+        keys.push(HEAP32[(base + i * size) >> 2]);
       }
-
-      /*for(var i = 0; i < num; i++) {
-        while(keys[i].length < maxLength) keys[i] = "0" + keys[i];
-      }*/
-
-      //for (var i = 0; i < num; i++) keys.push(base + i * size);
-
-      //var cmpFunc = getDynCallFunc_iii(cmp);
-      //keys.sort(cmpFunc);
 
       keys.sort(function(a, b) {
         return a - b;
       });
 
       // apply the sort
-      var temp = _malloc(num*size);
-      _memcpy(temp, base, num*size);
       for (var i = 0; i < num; i++) {
-        //var idx = (keys[i] - base) / size;
-        //if (idx == i) continue; // already in place
-        //_memcpy(base+i*size, temp+idx*size, size);
-
         HEAP32[(base+i*size >> 2)] = keys[i];
       }
-      _free(temp);
     }
 
   function _qsort(base, num, size, cmp) {
