@@ -24,7 +24,7 @@ window.addEventListener('load', function() {
       }
 
       log('length: ' + num);
-      //log('candidates: ' + candidates);
+      log('candidates: ' + candidates);
 
       PinyinDecoderService.resetSearch();
       delete candidates;
@@ -48,7 +48,7 @@ window.addEventListener('load', function() {
 
     /*document.getElementById('clear').onclick = function() {
       document.getElementById('log').innerHTML = '';
-    }*/s
+    }*/
   };
   document.getElementsByTagName('head')[0].appendChild(script_files);
 });
