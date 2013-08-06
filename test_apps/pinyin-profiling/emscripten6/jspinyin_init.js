@@ -18,6 +18,7 @@
     var im_search = Module.cwrap('im_search', 'number', ['string', 'number']);
     var im_get_candidate = Module.cwrap('im_get_candidate', 'string', ['number', 'string', 'number']);
     var im_get_candidate_char = Module.cwrap('im_get_candidate_char', 'string', ['number']);
+    var im_get_predicts = Module.cwrap('im_get_predicts', 'number', ['string', 'number']);
 
     log('Data file is ready');
     log('Opening data/dict.data ....');
@@ -78,6 +79,31 @@
           candidates += im_get_candidate_char(i) + ' ';
         }
         log('Candidates: ' + candidates);
+
+        var buf = Module._malloc(500 * 8 * 2);
+
+        var nPredicts = im_get_predicts(im_get_candidate_char(0), buf);
+        var predicts = [];
+
+        log(nPredicts);
+
+        var base = Module.getValue(buf, 'i16');
+
+        for(var i = 0; i < nPredicts; i++) {
+          var s = '';
+
+          for(var j = 0; j < 8; j++) {
+            var c = Module.getValue(base + i * 16 + j * 2, 'i16');
+            if(c == 0) break;
+            s += String.fromCharCode(c);
+          }
+
+          predicts.push(s);
+        }
+
+        log(predicts);
+
+        Module._free(buf);
       } catch (e) {
         log('error: ' + e);
       }

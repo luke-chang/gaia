@@ -27,6 +27,18 @@ window.addEventListener('load', function() {
       log('candidates: ' + candidates);
 
       PinyinDecoderService.resetSearch();
+
+      predicts = PinyinDecoderService.getPredicts(candidates[0]);
+      log('length: ' + predicts.length);
+
+      var predicts2 = [];
+
+      for(var id = 0; id < predicts.length; id++) {
+        predicts2.push(predicts[id][0]);
+      }
+
+      log('predicts: ' + predicts2);
+
       delete candidates;
     };
 
