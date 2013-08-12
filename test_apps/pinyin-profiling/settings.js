@@ -1,5 +1,8 @@
 var testRepeatCount = 10;
-document.getElementById('test2').value = 'text x ' + testRepeatCount;
+
+window.addEventListener('load', function() {
+  document.getElementById('test2').value = 'test x ' + testRepeatCount;
+});
 
 function getLoggerTime() {
   var date = new Date();

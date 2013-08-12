@@ -13,6 +13,10 @@ button, input[type="button"] {
   margin-top: 1rem;
 }
 
+#output {
+  margin-top: 1rem;
+}
+
 p {
   margin: 0.3rem;
 }
