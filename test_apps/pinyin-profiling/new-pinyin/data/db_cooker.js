@@ -88,7 +88,7 @@ function start(lines, valid) {
     return a.n - b.n;
   });
 
-  var table = [];
+  var table = [[],[],[],[]];
 
   total.forEach(function(phrase) {
     var code = [];
@@ -97,7 +97,7 @@ function start(lines, valid) {
       code.push(py2code(phrase.pinyin[i]));
     }
 
-    table.push([phrase.word].concat(code));
+    table[phrase.word.length - 1].push([phrase.word].concat(code));
   });
 
   console.log(JSON.stringify(table));

@@ -47,11 +47,11 @@ function test2() {
 
 function test() {
   var keyword = document.getElementById('pinyin').value.trim();
-  var seps = Engine.addChar('z');
-  log('length: ' + seps.join(','));
+  var size = Engine.addChar('z');
+  log('length: ' + size);
 
-  seps = Engine.addChar('h');
-  log('length: ' + seps.join(','));
+  size = Engine.addChar('q');
+  log('length: ' + size);
 
   var candidates = Engine.getCandidates();
   log(candidates);
