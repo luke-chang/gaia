@@ -1,107 +1,188 @@
 'use strict';
 
-var table;
+function JSPinyinEngine() {}
 
-function output(message) {
-  var outputDiv = document.getElementById('output');
-  outputDiv.innerHTML = message;
-}
+JSPinyinEngine.prototype = (function() {
+  var _table;
+  var _results;
+  var _py;
 
-window.addEventListener('load', function() {
-  log('load database...');
+  function _py2mask(py) {
+    var code = 0;
 
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "db.json", true);
-  xhr.onreadystatechange = function() {
-    if(xhr.readyState == 4) {
-      window.table = JSON.parse(xhr.responseText);
-      log('database loaded!');
-
-      document.getElementById('test').addEventListener('click', test);
-      document.getElementById('test2').addEventListener('click', test2);
-
-      //test();
-    }
-  };
-  xhr.send(null);
-});
-
-function test2() {
-  var keyword = document.getElementById('pinyin').value;
-
-  try {
-    log('search ' + testRepeatCount + ' times keyword ' + keyword);
-
-    var startTime = new Date().getTime();
-    var size = 0;
-
-    for (var i = 0; i < testRepeatCount; i++) {
-      size = test();
+    for(var i = 0; i < py.length; i++) {
+      code |= (31 << (5 * i));
     }
 
-    var endTime = new Date().getTime();
-
-    log('total cost: ' + (endTime - startTime) + 'ms');
-    log('average cost: ' + ((endTime - startTime) / testRepeatCount) + 'ms');
-    log('length: ' + size);
-  } catch (e) {
-    log('error: ' + e);
+    return code;
   }
-}
 
-function test() {
-  var keyword = document.getElementById('pinyin').value.trim();
-  var code = py2code(keyword);
-  var mask = py2mask(keyword);
-  var tableLen = table.length;
+  function _py2code(py) {
+    var code = 0;
 
-  var result = [];
-  var seps = [];
-  var prelen = 1;
+    for(var i = 0; i < py.length; i++) {
+      code |= (py.charCodeAt(i) - 96) << (5 * i);
+    }
 
-  for(var i = 0; i < tableLen; i++) {
-    if((table[i][1] & mask) == code) {
-      if(table[i][0].length != prelen) {
-        seps.push(result.length);
-        prelen = table[i][0].length;
+    return code;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  function JSPinyinEngine_reset() {
+    _py = '';
+    _results = [];
+  }
+
+  function JSPinyinEngine_init(callback) {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "db.json", true);
+      xhr.responseType = 'json';
+      xhr.onload = function() {
+        _table = xhr.response;
+        JSPinyinEngine_reset();
+        if(callback) callback(true);
+      };
+      xhr.send(null);
+    } catch(e) {
+      console.error(e.message);
+      if(callback) callback(false);
+    }
+  }
+
+  function JSPinyinEngine_uninit() {
+    JSPinyinEngine_reset();
+    _table = null;
+  }
+
+  function JSPinyinEngine_addChar(char) {
+    if(! _table) return 0;
+
+    if(_py == '') {
+      _py = char;
+      return JSPinyinEngine_search(char);
+    }
+
+    _py += char;
+
+    var table = _table;
+    var tableLen = table.length;
+
+    var keyword = _py;
+    var keywordLen = keyword.length;
+
+    var code = _py2code(keyword);
+    var mask = _py2mask(keyword);
+
+    var single_code = _py2code(char);
+    var single_mask = _py2mask(char);
+
+    var firstCandidate = '';
+    var result = [];
+    var seps = new Array(4);
+    var prelen = 4;
+
+    var pre_result = _results[keywordLen - 2];
+    var pre_cands = pre_result.candidates;
+    var pre_cands_length = pre_cands.length;
+
+    for (var i = 0 ; i < pre_cands_length; i++) {
+      var id = pre_cands[i][0];
+      var pre_matched_pos = pre_cands[i][1];
+      var item = table[id];
+
+      var matched;
+
+      if((item[1 +  pre_matched_pos] & mask) == code) {
+        matched = 1;
+      } else if(typeof item[2 + pre_matched_pos] !== 'undefined' &&
+                (item[2 +  pre_matched_pos] & single_mask) == single_code ) {
+        matched = 2;
+      } else {
+        matched = 0;
       }
 
-      result.push(i);
+      if(matched) {
+        for( ; prelen > item[0].length; prelen--) {
+          seps[4 - prelen] = result.length;
+        }
+
+        result.push([id, pre_matched_pos + matched - 1]);
+      }
     }
+
+    seps[3] = result.length;
+
+    _results[keywordLen - 1] = {
+      firstCandidate: firstCandidate,
+      candidates: result,
+      seps: seps
+    };
+
+    return seps;
   }
 
-  var s = '';
+  function JSPinyinEngine_search(keyword) {
+    if(! _table) return 0;
 
-  for(var i = 0; i < seps[0]; i++) {
-    s += table[ result[i] ][0];
+    var table = _table;
+    var tableLen = table.length;
+
+    var code = _py2code(keyword);
+    var mask = _py2mask(keyword);
+
+    var result = [];
+    var seps = new Array(4);
+    var prelen = 4;
+
+    for(var i = 0; i < tableLen; i++) {
+      if((table[i][1] & mask) == code) {
+        for( ; prelen > table[i][0].length; prelen--) {
+          seps[4 - prelen] = result.length;
+        }
+
+        result.push([i, 0]);
+      }
+    }
+
+    seps[3] = result.length;
+
+    _results[0] = {
+      pinyin: keyword,
+      firstCandidate: table[ result[0][0] ][0],
+      candidates: result,
+      seps: seps
+    };
+
+    return seps;
   }
 
-  output(s);
+  function JSPinyinEngine_getCandidates() {
+    var table = _table;
+    var result = _results[ _results.length - 1 ];
 
-  var count = seps[0];
+    var cands = result.candidates;
+    var head = result.seps[2];
+    var tail = result.seps[3];
 
-  result = null;
-  seps = null;
+    var candidates = [];
 
-  return count;
-}
+    for(var i = head; i < tail; i++) {
+      candidates.push(table[ cands[i][0] ][0]);
+    }
 
-function py2mask(py) {
-  var code = 0;
-
-  for(var i = 0; i < py.length; i++) {
-    code |= (31 << (5 * i));
+    return candidates;
   }
 
-  return code;
-}
+  ///////////////////////////////////////
 
-function py2code(py) {
-  var code = 0;
-
-  for(var i = 0; i < py.length; i++) {
-    code |= (py.charCodeAt(i) - 96) << (5 * i);
+  return {
+    init: JSPinyinEngine_init,
+    uninit: JSPinyinEngine_uninit,
+    addChar: JSPinyinEngine_addChar,
+    search: JSPinyinEngine_search,
+    reset: JSPinyinEngine_reset,
+    getCandidates: JSPinyinEngine_getCandidates
   }
-
-  return code;
-}
+})();

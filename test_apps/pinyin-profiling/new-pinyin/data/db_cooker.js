@@ -83,7 +83,7 @@ function start(lines, valid) {
   var total = words.concat(phrases);
 
   total.sort(function(a, b) {
-    if(a.word.length != b.word.length) return a.word.length - b.word.length;
+    if(a.word.length != b.word.length) return b.word.length - a.word.length;
     if(a.freq != b.freq) return b.freq - a.freq;
     return a.n - b.n;
   });
