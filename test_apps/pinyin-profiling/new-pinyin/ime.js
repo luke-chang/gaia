@@ -1,9 +1,6 @@
-var table;
+'use strict';
 
-/*function log(message) {
-  var logDiv = document.getElementById('log');
-  logDiv.innerHTML = new Date() + ' : ' + message + "<br>" + logDiv.innerHTML;
-}*/
+var table;
 
 function output(message) {
   var outputDiv = document.getElementById('output');
@@ -30,7 +27,7 @@ window.addEventListener('load', function() {
 });
 
 function test2() {
-  keyword = document.getElementById('pinyin').value;
+  var keyword = document.getElementById('pinyin').value;
 
   try {
     log('search ' + testRepeatCount + ' times keyword ' + keyword);
@@ -53,9 +50,9 @@ function test2() {
 }
 
 function test() {
-  var input = document.getElementById('pinyin').value.trim();
-  var code = py2code(input);
-  var mask = py2mask(input);
+  var keyword = document.getElementById('pinyin').value.trim();
+  var code = py2code(keyword);
+  var mask = py2mask(keyword);
   var tableLen = table.length;
 
   var result = [];
@@ -73,13 +70,13 @@ function test() {
     }
   }
 
-  /*var s = '';
+  var s = '';
 
   for(var i = 0; i < seps[0]; i++) {
     s += table[ result[i] ][0];
   }
 
-  output(s);*/
+  output(s);
 
   var count = seps[0];
 
