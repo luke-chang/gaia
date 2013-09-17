@@ -426,6 +426,20 @@ function initKeyboard() {
   }
 }
 
+function handleOnSurroundingTextChange(evt) {
+  if (inputMethod && inputMethod.onSurroundingTextChange) {
+    inputMethod.onSurroundingTextChange(
+      evt.detail.beforeString, evt.detail.afterString);
+  }
+}
+
+function handleOnSelectionChange(evt) {
+  if (inputMethod && inputMethod.onSelectionChange) {
+    inputMethod.onSelectionChange(
+      evt.detail.selectionStart, evt.detail.selectionEnd);
+  }
+}
+
 function handleKeyboardSound() {
   if (clickEnabled && isSoundEnabled) {
     clicker = new Audio(CLICK_SOUND);
@@ -1632,6 +1646,8 @@ function showKeyboard() {
   clearTimeout(hideKeyboardTimeout);
 
   inputContext = navigator.mozInputMethod.inputcontext;
+  inputContext.onsurroundingtextchange = handleOnSurroundingTextChange;
+  inputContext.onselectionchange = handleOnSelectionChange;
 
   resetKeyboard();
 
@@ -1702,6 +1718,11 @@ function showKeyboard() {
 function hideKeyboard() {
   if (!isKeyboardRendered)
     return;
+
+  if (inputContext) {
+    inputContext.onsurroundingtextchange = null;
+    inputContext.onselectionchange = null;
+  }
 
   clearTimeout(hideKeyboardTimeout);
 

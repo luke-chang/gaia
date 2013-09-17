@@ -51,7 +51,9 @@
     click: click,
     select: select,
     setLayoutParams: setLayoutParams,
-    setLanguage: setLanguage
+    setLanguage: setLanguage,
+    onSurroundingTextChange: onSurroundingTextChange,
+    onSelectionChange: onSelectionChange
   };
 
   // This is the object that is passed to init().
@@ -941,6 +943,16 @@
 
     var c = inputText[i];
     return c === '.' || c === '?' || c === '!';
+  }
+
+  function onSurroundingTextChange(beforeString, afterString) {
+    console.log('luke: onsurroundingtextchange->' +
+      beforeString + ', ' + afterString);
+  }
+
+  function onSelectionChange(selectionStart, selectionEnd) {
+    console.log('luke: onselectionchange->' +
+      selectionStart + ', ' + selectionEnd);
   }
 
   if (!('LAYOUT_PAGE_DEFAULT' in window))
