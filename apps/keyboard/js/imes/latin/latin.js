@@ -210,8 +210,8 @@
     if (suggesting || correcting) {
       if (!worker || lang !== language)
         setLanguage(lang);  // This calls updateSuggestions
-      else
-        updateSuggestions();
+      //else
+        //updateSuggestions();
     }
   }
 
@@ -282,7 +282,7 @@
     worker.postMessage({ cmd: 'setLanguage', args: [language]});
 
     // And now that we've changed the language, ask for new suggestions
-    updateSuggestions();
+    //updateSuggestions();
   }
 
   function displaysCandidates() {
@@ -385,7 +385,7 @@
     updateCapitalization();
 
     // If we're offering suggestions, ask the worker to make them now
-    updateSuggestions(repeat);
+    //updateSuggestions(repeat);
 
     // Exit symbol layout mode after space or return key is pressed.
     if (keycode === SPACE || keycode === RETURN) {
@@ -710,7 +710,7 @@
       worker.postMessage({ cmd: 'setNearbyKeys', args: [nearbyKeyMap]});
       // Ask for new suggestions since the new layout may affect them.
       // (When switching from QWERTY to Dvorak, e.g.)
-      updateSuggestions();
+      //updateSuggestions();
     }
   }
 
@@ -948,6 +948,81 @@
   function onSurroundingTextChange(beforeString, afterString) {
     console.log('luke: onsurroundingtextchange->' +
       beforeString + ', ' + afterString);
+
+    // If the user hasn't enabled suggestions, or if they're not appropriate
+    // for this input type, or are turned off by the input mode, do nothing
+    if (!suggesting && !correcting)
+      return;
+
+    // If we don't have a worker (probably because no dictionary) then
+    // do nothing
+    if (!worker)
+      return;
+
+    /*// If we deferred suggestions because of a key repeat, clear that timer
+    if (suggestionsTimer) {
+      clearTimeout(suggestionsTimer);
+      suggestionsTimer = null;
+    }
+
+    // If we're still repeating, reset the repeat timer.
+    if (repeat) {
+      suggestionsTimer = setTimeout(updateSuggestions, autorepeatDelay);
+      return;
+    }*/
+
+    function atWordEnd2() {
+      // If there is a selection we never want suggestions
+      if (selection)
+        return false;
+
+      // If we're not at the end of the line and the character after the
+      // cursor is not whitespace, don't offer a suggestion
+      // Note that we purposely use WS here, not WORDSEP.
+      if (afterString.length > 0 && !WS.test(afterString[0]))
+        return false;
+
+      // If the cursor is at position 0 then we're not at the end of a word
+      if (!beforeString)
+        return false;
+
+      // We're at the end of a word if the character before the cursor is
+      // not a word separator character
+      var c = beforeString[beforeString.length - 1];
+      return !WORDSEP.test(c);
+    }
+
+    function wordBeforeCursor2() {
+      for (var firstletter = beforeString.length - 1;
+           firstletter >= 0;
+           firstletter--) {
+        if (WORDSEP.test(beforeString[firstletter])) {
+          break;
+        }
+      }
+      firstletter++;
+
+      // firstletter is now the position of the start of the word and cursor is
+      // the end of the word
+      return beforeString.substr(firstletter);
+    }
+
+    console.log('luke: atWordEnd2=' + atWordEnd2());
+
+    // If we're not at the end of a word, we want to clear any suggestions
+    // that might already be there
+    if (!atWordEnd2()) {
+      if (suggesting)
+        keyboard.sendCandidates([]);
+      return;
+    }
+
+    console.log('luke: wordBeforeCursor2=' + wordBeforeCursor2());
+
+    var word = wordBeforeCursor2();
+    if (word) { // Defend against bug 879572 even though I can't reproduce it
+      worker.postMessage({cmd: 'predict', args: [word]});
+    }
   }
 
   function onSelectionChange(selectionStart, selectionEnd) {
