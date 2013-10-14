@@ -88,7 +88,7 @@ button::-moz-focus-inner {
   color: #fff;
   font-size: 2.4rem;
   line-height: 3.8rem;
-  text-transform: uppercase;
+  /*text-transform: uppercase;*/
   font-weight: 500;
   text-align: center;
   border-top: 0.1rem solid #504e4d;
@@ -202,7 +202,7 @@ button::-moz-focus-inner {
   bottom: 0;
   left: 0;
   color: #ccc;
-  font: 500 1.5rem/3.9rem 'Keyboard Symbols', sans-serif;
+  font: 500 1.8rem/3.9rem 'Keyboard Symbols', sans-serif;
   border-color: #6a6c6e;
 }
 
@@ -246,20 +246,21 @@ button::-moz-focus-inner {
 /* Key states */
 /* Active key, used for caps Lock key */
 .keyboard-key.kbr-key-active > .visual-wrapper {
-  background-color: #006a80;
+  /*background-color: #006a80;*/
 }
 
 .keyboard-key.kbr-key-active.highlighted > .visual-wrapper {
-  background-color: #2b8395;
+  /*background-color: #2b8395;*/
 }
 
 .keyboard-key.kbr-key-active > .visual-wrapper > span {
-  color: #fff;
-  border-color: rgba(255, 255, 255, .2);
+  /*color: #fff;
+  border-color: rgba(255, 255, 255, .2);*/
+  color: #00caf2;
 }
 
 .keyboard-key.kbr-key-active.highlighted > .visual-wrapper > span {
-  border-color: rgba(255,255,255, .2);
+  /*border-color: rgba(255,255,255, .2);*/
 }
 
 /* Hold */
@@ -268,12 +269,12 @@ button::-moz-focus-inner {
 }
 
 .keyboard-key.kbr-key-hold > .visual-wrapper > span {
-  color: #333;
+  color: #fff;
   border-color: rgba(255,255,255, .3);
 }
 
 .keyboard-key.kbr-key-hold.highlighted > .visual-wrapper {
-  background-color: #2bb8d1;
+  background-color: #00aac8;
 }
 
 .keyboard-key.kbr-key-hold.highlighted > .visual-wrapper > span {
