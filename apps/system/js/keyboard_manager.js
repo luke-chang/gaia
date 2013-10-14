@@ -74,7 +74,7 @@ var KeyboardManager = {
 
   focusChangeTimeout: 0,
   switchChangeTimeout: 0,
-  _onDebug: false,
+  _onDebug: true,
   _debug: function km_debug(msg) {
     if (this._onDebug)
       console.log('[Keyboard Manager] ' + msg);
@@ -517,9 +517,32 @@ var KeyboardManager = {
       var index = (showed.index + 1) % length;
       if (!self.keyboardLayouts[showed.type])
         showed.type = 'text';
+
+      //var layout = self.keyboardLayouts[showed.type][index];
+
       self.keyboardLayouts[showed.type].activeLayout = index;
-      self.resetShowingKeyboard();
-      self.setKeyboardToShow(showed.type, index);
+
+      //if (showed.frame.dataset.frameOrigin === layout.origin) {
+        self.resetShowingKeyboard();
+        self.setKeyboardToShow(showed.type, index);
+      /*} else {
+        self.keyboardFrameContainer.classList.add('hide');
+        window.dispatchEvent(new CustomEvent('keyboardhide'));
+        var onHideEnd = function km_onHideEnd() {
+
+          console.log('luke: test 1');
+
+          self.keyboardFrameContainer.removeEventListener('transitionend',
+              onHideEnd);
+          self.keyboardHeight = 0;
+          self.resetShowingKeyboard();
+          self.setKeyboardToShow(showed.type, index);
+
+          console.log('luke: test 2');
+        };
+        self.keyboardFrameContainer.addEventListener('transitionend',
+          onHideEnd);
+      }*/
     }, FOCUS_CHANGE_DELAY);
   },
 
