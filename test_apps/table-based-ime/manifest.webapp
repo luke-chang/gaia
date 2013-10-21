@@ -1,0 +1,38 @@
+{
+  "name": "Table-based IME",
+  "description": "A tabled-based IME which can import cin format file.",
+  "type": "certified",
+  "role": "keyboard",
+  "launch_path": "/settings.html",
+  "developer": {
+    "name": "The Gaia Team",
+    "url": "https://github.com/mozilla-b2g/gaia"
+  },
+  "permissions": {
+    "keyboard": {
+      "description": "To send key events"
+    }
+  },
+  "entry_points": {
+    "english": {
+      "launch_path": "/index.html",
+      "name": "Table-based IME",
+      "description": "Table-based IME",
+      "types": ["text"]
+    }
+  },
+  "icons": {
+    "128": "/style/icons/test-keyboard.png"
+  },
+  "locales": {
+    "en-US": {
+      "name": "Table-based IME",
+      "description": "A tabled-based IME which can import cin format file."
+    },
+    "zh-TW": {
+      "name": "表格式輸入法",
+      "description": "一個可以使用 cin 格式的表格檔櫎充的輸入法。"
+    }
+  },
+  "default_locale": "en-US"
+}
