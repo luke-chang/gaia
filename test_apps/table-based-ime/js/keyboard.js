@@ -1,7 +1,7 @@
 var inputContext = null;
 var keyboardElement;
 
-function init() {
+function init_old() {
   keyboardElement = document.getElementById('keyboard');
 
   window.navigator.mozInputMethod.oninputcontextchange = function() {
@@ -65,5 +65,34 @@ function sendKey(keyCode) {
     break;
   }
 }
+///////////////////////////////////
 
-window.addEventListener('load', init);
+var Keyboard = function keyboard_constructor(element) {
+  this._keyboard = element;
+  this._keyboard.addEventListener('mousemove', this);
+}
+
+Keyboard.prototype = {
+  handleEvent: function keyboard_handleEvent(evt) {
+    var self = this;
+
+    function getMousePos(evt) {
+      var rect = self._keyboard.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
+    }
+
+    switch(evt.type) {
+      case 'mousemove':
+        var pos = getMousePos(evt);
+        console.log(JSON.stringify(pos));
+        break;
+    }
+  }
+};
+
+window.addEventListener('load', function init() {
+  var keyboard = new Keyboard(document.getElementById('keyboard'));
+});
