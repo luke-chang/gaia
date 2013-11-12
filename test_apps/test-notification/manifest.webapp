@@ -1,0 +1,16 @@
+{
+  "name": "Test Notification",
+  "icons": {
+    "120": "/icon.png"
+  },
+  "launch_path": "/index.html",
+  "permissions": {
+    "audio-channel-notification":{},
+    "desktop-notification":{}
+  },
+  "type": "certified",
+  "developer": {
+    "url": "https://github.com/mozilla-b2g/gaia",
+    "name": "The Gaia Team"
+  }
+}
