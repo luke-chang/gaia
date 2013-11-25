@@ -1245,6 +1245,12 @@ var WindowManager = (function() {
 
   function appendFrame(origFrame, origin, url, name, manifest, manifestURL,
                        expectingSystemMessage) {
+
+    console.log('921829: appendFrame: origin=' + origin + ', url=' + url +
+      ', manifestURL=' + manifestURL);
+
+    dumpIframeAndRunningApps('appendFrame_begin');
+
     // Create the <iframe mozbrowser mozapp> that hosts the app
     var frame =
         createFrame(origFrame, origin, url, name, manifest, manifestURL);
@@ -1312,6 +1318,8 @@ var WindowManager = (function() {
 
     numRunningApps++;
 
+    dumpIframeAndRunningApps('appendFrame_end');
+
     return app;
   }
 
@@ -1376,8 +1384,12 @@ var WindowManager = (function() {
   }
 
   function removeFrame(origin) {
+    dumpIframeAndRunningApps('removeFrame_begin');
+
     var app = runningApps[origin];
     var frame = app.frame;
+
+    console.log('921829: ' + app.manifestURL + ' is killed. iframe src = ' + app.iframe.src + ' , mozapp=' + app.iframe.getAttribute('mozapp'));
 
     if (frame) {
       windows.removeChild(frame);
@@ -1403,6 +1415,8 @@ var WindowManager = (function() {
       URL.revokeObjectURL(screenshots[origin]);
       delete screenshots[origin];
     }
+
+    dumpIframeAndRunningApps('removeFrame_end');
   }
 
   function removeInlineFrame(frame) {
@@ -1835,6 +1849,9 @@ var WindowManager = (function() {
     var origin = e.target.dataset.frameOrigin;
     var manifestURL = e.target.getAttribute('mozapp');
 
+    console.log('921829: mozbrowsererror: origin=' + origin +
+      ', manifestURL=' + manifestURL);
+
     if (e.target.dataset.frameType == 'inline-activity') {
       stopInlineActivity(true);
       handleAppCrash(origin, manifestURL);
@@ -2042,6 +2059,8 @@ var WindowManager = (function() {
     if (searchURL)
       iframe.dataset.searchURL = searchURL;
 
+    console.log('921829: mozbrowseropenwindow: iframe.src=' + url);
+
     // First load blank page in order to hide previous website
     iframe.src = url;
 
@@ -2051,6 +2070,8 @@ var WindowManager = (function() {
 
   // Stop running the app with the specified origin
   function kill(origin, callback) {
+    console.log('921829: kill(' + origin + '), isRunning=' + isRunning(origin));
+
     if (!isRunning(origin)) {
       if (callback) {
         setTimeout(callback);
@@ -2199,6 +2220,49 @@ var WindowManager = (function() {
   window.setTimeout(function() {
     window.removeEventListener('devicemotion', dumbListener2);
   }, 2000);
+
+  var last_volume_up = 0;
+  window.addEventListener('volumeup', function() {
+    var now = new Date().getTime();
+
+    if (now - last_volume_up > 1000) {
+      last_volume_up = now;
+      return;
+    }
+
+    last_volume_up = 0;
+
+    dumpIframeAndRunningApps('volumeup');
+  });
+
+  function dumpIframeAndRunningApps(title) {
+    title = title || 'dumpIframeAndRunningApps';
+    console.log('921829: ================= ' + title + ' ================');
+
+    var iframes = document.getElementsByTagName('iframe');
+
+    console.log('921829: (all iframes: ' + iframes.length +
+      ') -------------------------------------------------');
+
+    for(var i = 0; i < iframes.length; i++) {
+      console.log('921829: iframe[' + i + '].src = ' +
+        iframes[i].src);
+      console.log('921829: iframe[' + i + '].getAttribute("mozapp") = ' +
+        iframes[i].getAttribute("mozapp"));
+    }
+
+    console.log('921829: (runningApps: ' + numRunningApps +
+      ') -------------------------------------------------');
+
+    for(var i in runningApps) {
+      console.log('921829: runningApps[' + i + '].iframe.src = ' +
+        runningApps[i].iframe.src);
+      console.log('921829: runningApps[' + i + '].iframe.getAttribute("mozapp") = ' +
+        runningApps[i].iframe.getAttribute("mozapp"));
+    }
+
+    console.log('921829: ===================================================');
+  }
 
   // Return the object that holds the public API
   return {

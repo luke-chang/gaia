@@ -151,6 +151,8 @@
 
     this.render();
 
+    console.log('921829: ' + this.manifestURL + ' is created. iframe src = ' + this.iframe.src);
+
     return this;
   };
 
