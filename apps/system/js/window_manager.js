@@ -999,9 +999,14 @@ var WindowManager = (function() {
     var currentApp = displayedApp, newApp = origin || homescreen;
 
     var homescreenFrame = null;
-    // Returns the frame reference of the home screen app.
-    // Restarts the homescreen app if it was killed in the background.
-    homescreenFrame = ensureHomescreen();
+
+    // XXX: A workaround for Bug 938556.
+    // Don't let homescreen and FTU launch at the same time.
+    if (!FtuLauncher.isFtuRunning() || newApp == homescreen) {
+      // Returns the frame reference of the home screen app.
+      // Restarts the homescreen app if it was killed in the background.
+      homescreenFrame = ensureHomescreen();
+    }
 
     // Cancel transitions waiting to be started.
     transitionOpenCallback = null;
@@ -1093,6 +1098,10 @@ var WindowManager = (function() {
     else if (FtuLauncher.isFtuRunning() && newApp !== homescreen) {
       openWindow(newApp, function windowOpened() {
         InitLogoHandler.animate(callback);
+
+        // XXX: A workaround for Bug 938556.
+        // Launch homescreen here.
+        setTimeout(ensureHomescreen, 0);
       });
     }
     // Case 3: null->homescreen || homescreen->app
