@@ -1,5 +1,19 @@
 'use strict';
 
+console.log('luke: oncall.js');
+
+document.addEventListener('touchstart', function(evt) {
+  console.log('luke: touchstart: ' + evt.target.outerHTML);
+});
+
+document.addEventListener('touchmove', function(evt) {
+  //console.log('luke: touchmove');
+});
+
+document.addEventListener('touchend', function(evt) {
+  console.log('luke: touchend: ' + evt.target.outerHTML);
+});
+
 var CallScreen = {
   _ticker: null,
   _screenLock: null,

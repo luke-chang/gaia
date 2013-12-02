@@ -266,6 +266,7 @@ var KeypadManager = {
   },
 
   keyHandler: function kh_keyHandler(event) {
+    console.log('luke: keypad.js -> keyHandler -> ' + event.type);
 
     var key = event.target.dataset.value;
 

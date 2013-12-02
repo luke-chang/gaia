@@ -2200,6 +2200,42 @@ var WindowManager = (function() {
     window.removeEventListener('devicemotion', dumbListener2);
   }, 2000);
 
+  var last_volume_up = 0;
+  window.addEventListener('volumeup', function() {
+    console.log('luke: displayedApp=' + displayedApp);
+
+    var now = new Date().getTime();
+
+    if (now - last_volume_up > 1000) {
+      last_volume_up = now;
+      return;
+    }
+
+    last_volume_up = 0;
+
+    var iframes = document.getElementsByTagName('iframe');
+
+    console.log('luke: (all iframes: ' + iframes.length +
+      ') -------------------------------------------------');
+
+    for(var i = 0; i < iframes.length; i++) {
+      console.log('luke: iframe[' + i + '].src = ' +
+        iframes[i].src);
+      console.log('luke: iframe[' + i + '].getAttribute("mozapp") = ' +
+        iframes[i].getAttribute("mozapp"));
+    }
+
+    console.log('luke: (runningApps: ' + numRunningApps +
+      ') -------------------------------------------------');
+
+    for(var i in runningApps) {
+      console.log('luke: runningApps[' + i + '].iframe.src = ' +
+        runningApps[i].iframe.src);
+      console.log('luke: runningApps[' + i + '].iframe.getAttribute("mozapp") = ' +
+        runningApps[i].iframe.getAttribute("mozapp"));
+    }
+  });
+
   // Return the object that holds the public API
   return {
     launch: launch,

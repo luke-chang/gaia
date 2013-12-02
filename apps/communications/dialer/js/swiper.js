@@ -31,6 +31,8 @@ var Swiper = {
   handleEvent: function ls_handleEvent(evt) {
     switch (evt.type) {
       case 'touchstart':
+        console.log('luke: swiper.js -> handleEvent -> ' + evt.type);
+
         var overlay = this.overlay;
 
         if (overlay.classList.contains('triggered')) {
@@ -55,10 +57,14 @@ var Swiper = {
         break;
 
       case 'touchmove':
+        console.log('luke: swiper.js -> handleEvent -> ' + evt.type);
+
         this.handleMove(evt.touches[0].pageX, evt.touches[0].pageY);
         break;
 
       case 'touchend':
+        console.log('luke: swiper.js -> handleEvent -> ' + evt.type);
+
         window.removeEventListener('touchmove', this);
         window.removeEventListener('touchend', this);
         this.handleGesture();
