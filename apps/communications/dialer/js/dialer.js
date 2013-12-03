@@ -1,5 +1,19 @@
 'use strict';
 
+console.log('luke: dialer.js');
+
+window.addEventListener('touchstart', function(evt) {
+  console.log('luke: dialer: touchstart: ' + evt.target.outerHTML);
+});
+
+window.addEventListener('touchmove', function(evt) {
+  //console.log('luke: dialer: touchmove');
+});
+
+window.addEventListener('touchend', function(evt) {
+  console.log('luke: dialer: touchend: ' + evt.target.outerHTML);
+});
+
 var CallHandler = (function callHandler() {
   var COMMS_APP_ORIGIN = document.location.protocol + '//' +
     document.location.host;

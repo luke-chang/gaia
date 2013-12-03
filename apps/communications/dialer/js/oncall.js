@@ -2,16 +2,16 @@
 
 console.log('luke: oncall.js');
 
-document.addEventListener('touchstart', function(evt) {
-  console.log('luke: touchstart: ' + evt.target.outerHTML);
+window.addEventListener('touchstart', function(evt) {
+  console.log('luke: oncall: touchstart: ' + evt.target.outerHTML);
 });
 
-document.addEventListener('touchmove', function(evt) {
-  //console.log('luke: touchmove');
+window.addEventListener('touchmove', function(evt) {
+  //console.log('luke: oncall: touchmove');
 });
 
-document.addEventListener('touchend', function(evt) {
-  console.log('luke: touchend: ' + evt.target.outerHTML);
+window.addEventListener('touchend', function(evt) {
+  console.log('luke: oncall: touchend: ' + evt.target.outerHTML);
 });
 
 var CallScreen = {
@@ -488,6 +488,7 @@ var OnCallHandler = (function onCallHandler() {
       // We did animate the call screen off the viewport
       // now closing the window.
       if (!displayed) {
+        console.log('luke: close oncall window');
         closeWindow();
       }
     });
@@ -502,6 +503,10 @@ var OnCallHandler = (function onCallHandler() {
   }
 
   function exitCallScreen(animate) {
+    Swiper.handleEvent({
+      type: 'touchend'
+    });
+
     if (closing || busyNotificationLock) {
       return;
     }
