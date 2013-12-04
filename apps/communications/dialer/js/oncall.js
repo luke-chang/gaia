@@ -73,6 +73,18 @@ var CallScreen = {
     // If a user is typing keypad during calling,
     // we don't show the typed number in status bar mode.
     if (window.innerHeight <= 40) {
+      if (this.screen.dataset.layout == 'incoming-locked') {
+        this.render('incoming');
+        if (navigator.mozSettings) {
+          var self = this;
+          var req = navigator.mozSettings.createLock().get('wallpaper.image');
+          req.onsuccess = function cs_wi_onsuccess() {
+            self.setCallerContactImage(
+              req.result['wallpaper.image'], false, true);
+          };
+        }
+      }
+
       if (this.body.classList.contains('showKeypad')) {
         this._typedNumber = KeypadManager._phoneNumber;
         KeypadManager.restorePhoneNumber();
