@@ -1176,6 +1176,14 @@ var WindowManager = (function() {
   });
 
   function createFrame(origFrame, origin, url, name, manifest, manifestURL) {
+    if(origFrame) {
+      console.log('921829: createFrame: manifestURL=' + manifestURL +
+        ', url=' + url);
+    } else {
+      console.log('921829: createFrame: manifestURL=' + manifestURL +
+        ', url=' + url + ', origFrame=null');
+    }
+
     var iframe = origFrame || document.createElement('iframe');
     iframe.setAttribute('mozallowfullscreen', 'true');
 
