@@ -125,6 +125,7 @@ var emEngineWrapper = {
 var IMEngine = function engine_constructor() {};
 
 IMEngine.prototype = {
+  // Glue ojbect between the IMEngine and the IMEManager.
   _glue: {},
 
   // Buffer limit will force output the longest matching terms
@@ -154,6 +155,8 @@ IMEngine.prototype = {
 
   // Current keyboard
   _keyboard: 'zh-Hans-Pinyin',
+
+  _layoutPage: LAYOUT_PAGE_DEFAULT,
 
   _sendPendingSymbols: function engine_sendPendingSymbols() {
     debug('SendPendingSymbol: ' + this._pendingSymbols);
@@ -475,7 +478,8 @@ IMEngine.prototype = {
   },
 
   /**
-   * Override
+   * Initialization.
+   * @param {Glue} glue Glue object of the IMManager.
    */
   init: function engine_init(glue) {
     debug('init.');
@@ -483,7 +487,7 @@ IMEngine.prototype = {
   },
 
   /**
-   * Override
+   * Destruction.
    */
   uninit: function engine_uninit() {
     debug('Uninit.');
@@ -501,7 +505,8 @@ IMEngine.prototype = {
   },
 
   /**
-   *Override
+   * Notifies when a keyboard key is clicked.
+   * @param {number} keyCode The key code of an integer number.
    */
   click: function engine_click(keyCode) {
     if (this._layoutPage !== LAYOUT_PAGE_DEFAULT) {
@@ -535,14 +540,18 @@ IMEngine.prototype = {
     this._start();
   },
 
-  _layoutPage: LAYOUT_PAGE_DEFAULT,
-
+  /**
+   * Allows the IM to switch between default and symbol layouts on the
+   * keyboard.
+   */
   setLayoutPage: function engine_setLayoutPage(page) {
     this._layoutPage = page;
   },
 
   /**
-   * Override
+   * Notifies when a candidate is selected.
+   * @param {String} text The text of the candidate.
+   * @param {Object} data User data of the candidate.
    */
   select: function engine_select(text, data) {
     if (!emEngineWrapper.isReady())
@@ -576,7 +585,7 @@ IMEngine.prototype = {
   },
 
   /**
-   * Override
+   * Notifies when pending symbols need be cleared
    */
   empty: function engine_empty() {
     debug('empty.');
@@ -588,7 +597,7 @@ IMEngine.prototype = {
   },
 
   /**
-   * Override
+   * Notifies when the IM is shown
    */
   activate: function engine_activate(language, state, options) {
     if (this._uninitTimer) {
@@ -625,7 +634,7 @@ IMEngine.prototype = {
   },
 
   /**
-   * Override
+   * Called when the keyboard is hidden
    */
   deactivate: function engine_deactivate() {
     debug('Deactivate.');
@@ -657,6 +666,10 @@ IMEngine.prototype = {
     });
   },
 
+  /**
+   * (optional) Called when the render needs more candidates to show on the
+   * candidate panel.
+   */
   getMoreCandidates: function engine_getMore(indicator, maxCount, callback) {
     if (this._candidatesLength == 0) {
       callback(null);
