@@ -51,98 +51,6 @@ if (!KeyEvent) {
   };
 }
 
-var IMEngineBase = function engineBase_constructor() {
-  this._glue = {};
-};
-
-IMEngineBase.prototype = {
-  /**
-   * Glue ojbect between the IMEngieBase and the IMEManager.
-   */
-  _glue: {
-    /**
-     * The source code path of the IMEngine
-     * @type String
-     */
-    path: '',
-
-    /**
-     * Sends candidates to the IMEManager
-     */
-    sendCandidates: function(candidates) {},
-
-    /**
-     * Sends pending symbols to the IMEManager.
-     */
-    sendPendingSymbols: function(symbols) {},
-
-    /**
-     * Passes the clicked key to IMEManager for default action.
-     * @param {number} keyCode The key code of an integer.
-     */
-    sendKey: function(keyCode) {},
-
-    /**
-     * Sends the input string to the IMEManager.
-     * @param {String} str The input string.
-     */
-    sendString: function(str) {},
-
-    /**
-     * Change the keyboad
-     * @param {String} keyboard The name of the keyboard.
-     */
-    alterKeyboard: function(keyboard) {}
-  },
-
-  /**
-   * Initialization.
-   * @param {Glue} glue Glue object of the IMManager.
-   */
-  init: function engineBase_init(glue) {
-    this._glue = glue;
-  },
-
-  /**
-   * Destruction.
-   */
-  uninit: function engineBase_uninit() {
-  },
-
-  /**
-   * Notifies when a keyboard key is clicked.
-   * @param {number} keyCode The key code of an integer number.
-   */
-  click: function engineBase_click(keyCode) {
-  },
-
-  /**
-   * Notifies when pending symbols need be cleared
-   */
-  empty: function engineBase_empty() {
-  },
-
-  /**
-   * Notifies when a candidate is selected.
-   * @param {String} text The text of the candidate.
-   * @param {Object} data User data of the candidate.
-   */
-  select: function engineBase_select(text, data) {
-  },
-
-  /**
-   * Notifies when the IM is shown
-   */
-  activate: function engineBase_activate(language, state, options) {
-  },
-
-  /**
-   * Called when the keyboard is hidden
-   */
-  deactivate: function engineBase_deactivate() {
-  }
-};
-
 var emEngineWrapper = {
   _worker: null,
   _callback: null,
@@ -214,13 +122,10 @@ var emEngineWrapper = {
   }
 };
 
-var IMEngine = function engine_constructor() {
-  IMEngineBase.call(this);
-};
+var IMEngine = function engine_constructor() {};
 
 IMEngine.prototype = {
-  // Implements IMEngineBase
-  __proto__: new IMEngineBase(),
+  _glue: {},
 
   // Buffer limit will force output the longest matching terms
   // if the length of the syllables buffer is reached.
@@ -573,15 +478,14 @@ IMEngine.prototype = {
    * Override
    */
   init: function engine_init(glue) {
-    IMEngineBase.prototype.init.call(this, glue);
     debug('init.');
+    this._glue = glue;
   },
 
   /**
    * Override
    */
   uninit: function engine_uninit() {
-    IMEngineBase.prototype.uninit.call(this);
     debug('Uninit.');
 
     if (this._uninitTimer) {
@@ -604,8 +508,6 @@ IMEngine.prototype = {
       this._glue.sendKey(keyCode);
       return;
     }
-
-    IMEngineBase.prototype.click.call(this, keyCode);
 
     switch (keyCode) {
       case -11: // Switch to Pinyin Panel
@@ -643,8 +545,6 @@ IMEngine.prototype = {
    * Override
    */
   select: function engine_select(text, data) {
-    IMEngineBase.prototype.select.call(this, text, data);
-
     if (!emEngineWrapper.isReady())
       return;
 
@@ -679,7 +579,6 @@ IMEngine.prototype = {
    * Override
    */
   empty: function engine_empty() {
-    IMEngineBase.prototype.empty.call(this);
     debug('empty.');
     this._pendingSymbols = '';
     this._historyText = '';
@@ -692,8 +591,6 @@ IMEngine.prototype = {
    * Override
    */
   activate: function engine_activate(language, state, options) {
-    IMEngineBase.prototype.activate.call(this, language, state, options);
-
     if (this._uninitTimer) {
       clearTimeout(this._uninitTimer);
       this._uninitTimer = null;
@@ -731,7 +628,6 @@ IMEngine.prototype = {
    * Override
    */
   deactivate: function engine_deactivate() {
-    IMEngineBase.prototype.deactivate.call(this);
     debug('Deactivate.');
 
     if (!this._isActive)
