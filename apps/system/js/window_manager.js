@@ -186,6 +186,8 @@ var WindowManager = (function() {
     var animationName = evt.animationName;
     var frame = evt.target;
 
+    console.log('luke: animationend: animationName=' + animationName);
+
     if (animationName.indexOf('openApp') !== -1) {
       windowScaled(frame);
 
