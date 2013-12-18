@@ -249,15 +249,11 @@ var WindowManager = (function() {
   windows.addEventListener('transitionend', function frameTransitionend(evt) {
     var prop = evt.propertyName;
 
-    console.log('947053: transitionend 1: prop=' + prop);
-
     var frame = evt.target;
     if (prop !== 'transform')
       return;
 
     var classList = frame.classList;
-
-    console.log('947053: transitionend 2: classList=' + classList);
 
     if (classList.contains('inlineActivity')) {
       if (classList.contains('active')) {
@@ -292,7 +288,6 @@ var WindowManager = (function() {
         }
       } else if (classList.contains('closing-card')) {
         windowClosed(frame);
-        console.log('947053: closeCallback: 1');
         setTimeout(closeCallback);
         closeCallback = null;
 
@@ -350,7 +345,6 @@ var WindowManager = (function() {
     } else if (classList.contains('closing')) {
       windowClosed(frame);
 
-      console.log('947053: closeCallback: 2');
       setTimeout(closeCallback);
       closeCallback = null;
 
@@ -779,10 +773,7 @@ var WindowManager = (function() {
   }
 
   function waitForNextPaint(frame, callback) {
-    console.log('947053: waitForNextPaint: 1');
-
     function onNextPaint() {
-      console.log('947053: waitForNextPaint: 5');
       clearTimeout(timeout);
       callback();
     }
@@ -792,26 +783,17 @@ var WindowManager = (function() {
     // Register a timeout in case we don't receive
     // nextpaint in an acceptable time frame.
     var timeout = setTimeout(function() {
-      console.log('947053: waitForNextPaint: 3');
-
-      if ('removeNextPaintListener' in iframe) {
-        console.log('947053: waitForNextPaint: 4');
+      if ('removeNextPaintListener' in iframe)
         iframe.removeNextPaintListener(onNextPaint);
-      }
-
       callback();
     }, kTransitionTimeout);
 
-    if ('addNextPaintListener' in iframe) {
-      console.log('947053: waitForNextPaint: 2');
+    if ('addNextPaintListener' in iframe)
       iframe.addNextPaintListener(onNextPaint);
-    }
   }
 
   // Perform a "close" animation for the app's iframe
   function closeWindow(origin, callback) {
-    console.log('947053: closeWindow: 1');
-
     var app = runningApps[origin];
     setCloseFrame(app.frame);
     closeCallback = callback || function() {};
@@ -842,8 +824,6 @@ var WindowManager = (function() {
     closeFrame.dispatchEvent(evt);
 
     transitionCloseCallback = function startClosingTransition() {
-      console.log('947053: closeWindow: 2: closeFrame=' + closeFrame + ', ' + (transitionCloseCallback != startClosingTransition));
-
       if (wrapperFooter.classList.contains('visible')) {
         wrapperHeader.classList.remove('visible');
         wrapperFooter.classList.remove('visible');
@@ -851,8 +831,6 @@ var WindowManager = (function() {
 
       // We have been canceled by another transition.
       if (!closeFrame || transitionCloseCallback != startClosingTransition) {
-        console.log('947053: closeWindow: 3');
-
         setTimeout(closeCallback);
         closeCallback = null;
         return;
@@ -1018,8 +996,6 @@ var WindowManager = (function() {
 
   // Switch to a different app
   function setDisplayedApp(origin, callback) {
-    console.log('947053: setDisplayedApp 1');
-
     var currentApp = displayedApp, newApp = origin || homescreen;
 
     var homescreenFrame = null;
@@ -1067,8 +1043,6 @@ var WindowManager = (function() {
 
     // Dispatch an appwillopen event only when we open an app
     if (newApp != currentApp) {
-      console.log('947053: setDisplayedApp 2');
-
       var evt = document.createEvent('CustomEvent');
       evt.initCustomEvent('appwillopen', true, true, {
         origin: newApp,
@@ -1078,11 +1052,8 @@ var WindowManager = (function() {
       var app = runningApps[newApp];
       // Allows listeners to cancel app opening and so stay on homescreen
       if (!app.iframe.dispatchEvent(evt)) {
-        console.log('947053: setDisplayedApp 3');
-        if (typeof(callback) == 'function') {
-          console.log('947053: setDisplayedApp 4');
+        if (typeof(callback) == 'function')
           callback();
-        }
         return;
       }
 
@@ -1108,11 +1079,8 @@ var WindowManager = (function() {
       }
     }
 
-    console.log('947053: setDisplayedApp 5');
-
     // Case 1: the app is already displayed
     if (currentApp && currentApp == newApp) {
-      console.log('947053: setDisplayedApp 6');
       if (newApp == homescreen) {
         // relaunch homescreen
         openWindow(homescreen, callback);
@@ -1123,7 +1091,6 @@ var WindowManager = (function() {
     }
     // Case 2: null --> app
     else if (FtuLauncher.isFtuRunning() && newApp !== homescreen) {
-      console.log('947053: setDisplayedApp 7');
       openWindow(newApp, function windowOpened() {
         InitLogoHandler.animate(callback);
       });
@@ -1131,18 +1098,15 @@ var WindowManager = (function() {
     // Case 3: null->homescreen || homescreen->app
     else if ((!currentApp && newApp == homescreen) ||
              (currentApp == homescreen && newApp)) {
-      console.log('947053: setDisplayedApp 8');
       openWindow(newApp, callback);
     }
     // Case 4: app->homescreen
     else if (currentApp && currentApp != homescreen && newApp == homescreen) {
-      console.log('947053: setDisplayedApp 9');
       // For screenshot to catch current window size
       closeWindow(currentApp, callback);
     }
     // Case 5: app-to-app transition
     else {
-      console.log('947053: setDisplayedApp 10');
       switchWindow(newApp, callback);
     }
     // Set homescreen as active,
@@ -1427,8 +1391,6 @@ var WindowManager = (function() {
     }
     if (closeFrame == frame) {
       setCloseFrame(null);
-
-      console.log('947053: closeCallback: 3');
       setTimeout(closeCallback);
       closeCallback = null;
     }
@@ -2089,8 +2051,6 @@ var WindowManager = (function() {
 
   // Stop running the app with the specified origin
   function kill(origin, callback) {
-    console.log('947053: kill=' + origin + ', isRunning=' + isRunning(origin) + ', runningApps[origin].killed=' + runningApps[origin].killed + ', displayedApp=' + displayedApp);
-
     if (!isRunning(origin)) {
       if (callback) {
         setTimeout(callback);
