@@ -2127,14 +2127,23 @@ var WindowManager = (function() {
           }
         });
       } else {
-        setDisplayedApp(homescreen, function() {
-          console.log('947053: !!!!!!!!');
+        // XXX workaround bug 947053.
+        // We need to ensure that "removeFrame" will be called here.
+        (function() {
+          var callbackCalled = false;
+          var callbackFromSetDisplayedApp = function() {
+            if (callbackCalled) return;
+            callbackCalled = true;
 
-          removeFrame(origin);
-          if (callback) {
-            setTimeout(callback);
-          }
-        });
+            removeFrame(origin);
+            if (callback) {
+              setTimeout(callback);
+            }
+          };
+
+          setDisplayedApp(homescreen, callbackFromSetDisplayedApp);
+          setTimeout(callbackFromSetDisplayedApp, 700);
+        })();
       }
 
     } else {
