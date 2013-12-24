@@ -105,6 +105,8 @@ var WindowManager = (function() {
   // Make the specified app the displayed app.
   // Public function.  Pass null to make the homescreen visible
   function launch(origin) {
+    console.log('luke: launch');
+
     // If the origin is indeed valid we make that app as the displayed app.
     if (isRunning(origin)) {
       setDisplayedApp(origin);
@@ -206,6 +208,7 @@ var WindowManager = (function() {
           wrapperFooter.classList.add('visible');
 
         iframe.addEventListener('mozbrowserloadend', function onloaded(e) {
+          console.log('luke: iframe.mozbrowserloadend');
           iframe.removeEventListener('mozbrowserloadend', onloaded);
           onWindowReady();
         });
@@ -316,6 +319,8 @@ var WindowManager = (function() {
   }
 
   function setActiveApp(app) {
+    console.log('luke: setActiveApp');
+
     var openedApp = app;
     var closedApp = runningApps[displayedApp];
     var closedFrame = closedApp.frame;
@@ -333,6 +338,8 @@ var WindowManager = (function() {
   }
 
   windows.addEventListener('mozbrowserloadend', function loadend(evt) {
+    console.log('luke: windows.mozbrowserloadend');
+
     var iframe = evt.target;
     delete iframe.dataset.unloaded;
     var backgroundColor = evt.detail.backgroundColor;
@@ -529,6 +536,8 @@ var WindowManager = (function() {
 
   // Perform a "switching" animation for the closing frame and the opening frame
   function switchWindow(origin, callback) {
+    console.log('luke: switchWindow(' + origin + ')');
+
     // This will trigger different transition to both openWindow()
     // and closeWindow() transition.
     screenElement.classList.add('switch-app');
@@ -545,6 +554,8 @@ var WindowManager = (function() {
   // to ensure that it doesn't accidentally keep anything alive.
   function appLoadedHandler(e)
   {
+    console.log('luke: appLoadedHandler: ' + e.type);
+
     if (e.type != 'appopen' && e.type != 'mozbrowserloadend') {
       return;
     }
@@ -695,7 +706,10 @@ var WindowManager = (function() {
     }
     // Case 6: app-to-app transition
     else {
-      switchWindow(newApp, callback);
+      switchWindow(newApp, function() {
+        console.log('luke: switchWindow callback');
+        callback();
+      });
     }
 
     // Record the time when app was launched,
@@ -870,6 +884,7 @@ var WindowManager = (function() {
 
   window.addEventListener('homescreen-changed',
     function onHomeChanged(evt) {
+      console.log('luke: homescreen-changed');
       setDisplayedApp();
     });
 
@@ -907,6 +922,7 @@ var WindowManager = (function() {
 
   // Watch for event to bring a currently-open app to the foreground.
   window.addEventListener('displayapp', function(e) {
+    console.log('luke: displayapp');
     setDisplayedApp(e.detail.origin);
   });
 
@@ -939,6 +955,8 @@ var WindowManager = (function() {
 
   // TODO: Remove this.
   function windowLauncher(e) {
+    console.log('luke: launchapp');
+
     // TODO: Move into app window's attribute.
     var startTime = Date.now();
     var config = e.detail;
@@ -1057,6 +1075,8 @@ var WindowManager = (function() {
   });
 
   window.addEventListener('hidewindow', function() {
+    console.log('luke: hidewindow');
+
     if (displayedApp !== HomescreenLauncher.origin) {
       runningApps[displayedApp].setVisible(false);
     } else {
@@ -1065,6 +1085,8 @@ var WindowManager = (function() {
   });
 
   window.addEventListener('showwindow', function() {
+    console.log('luke: showwindow');
+
     // XXX: Refine this in AttentionWindow
     if (AttentionScreen.isFullyVisible())
       return;
@@ -1121,6 +1143,8 @@ var WindowManager = (function() {
   }
 
   window.addEventListener('launchwrapper', function(evt) {
+    console.log('luke: launchwrapper');
+
     var config = evt.detail;
     var app = runningApps[config.origin];
     if (!app) {
