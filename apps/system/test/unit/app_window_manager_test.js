@@ -43,7 +43,7 @@ suite('system/AppWindowManager', function() {
     stubById.returns(document.createElement('div'));
 
     window.lockScreen = MockLockScreen;
-    window.activityWindowFactory = MockActivityWindowFactory;
+    window.activityWindowFactory = new ActivityWindowFactory();
 
     home = new HomescreenWindow('fakeHome');
     MockHomescreenLauncher.mHomescreenWindow = home;
@@ -62,6 +62,8 @@ suite('system/AppWindowManager', function() {
   });
 
   teardown(function() {
+    window.activityWindowFactory = undefined;
+
     stubById.restore();
   });
 
@@ -566,7 +568,7 @@ suite('system/AppWindowManager', function() {
       AppWindowManager._updateActiveApp(app1.origin);
 
       var activity = new ActivityWindow({});
-      ActivityWindowFactory._activeActivity = activity;
+      activityWindowFactory._activeActivity = activity;
 
       var stubDisplay = this.sinon.stub(AppWindowManager, 'display');
       AppWindowManager.launch(fakeAppConfig7Activity);

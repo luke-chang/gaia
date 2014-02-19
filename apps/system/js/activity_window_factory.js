@@ -20,16 +20,6 @@
    * @requires module:AppWindowManager
    */
   function ActivityWindowFactory() {
-    window.addEventListener('mozChromeEvent', this);
-    window.addEventListener('launchactivity', this);
-    window.addEventListener('activitycreated', this);
-    window.addEventListener('activityterminated', this);
-    window.addEventListener('activityopening', this);
-    window.addEventListener('activityclosing', this);
-    window.addEventListener('hidewindow', this);
-    window.addEventListener('showwindow', this);
-    window.addEventListener('home', this);
-    window.addEventListener('holdhome', this);
   }
 
   ActivityWindowFactory.prototype = {
@@ -57,12 +47,64 @@
      */
     _activities: [],
 
-    debug: function awm_debug() {
+    /**
+     * Indicate whether this class is started or not
+     * @access private
+     * @type {Boolean}
+     * @memberof ActivityWindowFactory.prototype
+     */
+    _started: false,
+
+    debug: function acwf_debug() {
       if (DEBUG) {
         console.log('[ActivityWindowFactory]' +
           '[' + System.currentTime() + ']' +
           Array.slice(arguments).concat());
       }
+    },
+
+    /**
+     * Register all event handlers.
+     * @memberof ActivityWindowFactory.prototype
+     */
+    start: function acwf_start() {
+      if (this._started) {
+        return;
+      }
+      this._started = true;
+
+      window.addEventListener('mozChromeEvent', this);
+      window.addEventListener('launchactivity', this);
+      window.addEventListener('activitycreated', this);
+      window.addEventListener('activityterminated', this);
+      window.addEventListener('activityopening', this);
+      window.addEventListener('activityclosing', this);
+      window.addEventListener('hidewindow', this);
+      window.addEventListener('showwindow', this);
+      window.addEventListener('home', this);
+      window.addEventListener('holdhome', this);
+    },
+
+    /**
+     * Unregister all event handlers.
+     * @memberof ActivityWindowFactory.prototype
+     */
+    stop: function acwf_stop() {
+      if (!this._started) {
+        return;
+      }
+      this._started = false;
+
+      window.removeEventListener('mozChromeEvent', this);
+      window.removeEventListener('launchactivity', this);
+      window.removeEventListener('activitycreated', this);
+      window.removeEventListener('activityterminated', this);
+      window.removeEventListener('activityopening', this);
+      window.removeEventListener('activityclosing', this);
+      window.removeEventListener('hidewindow', this);
+      window.removeEventListener('showwindow', this);
+      window.removeEventListener('home', this);
+      window.removeEventListener('holdhome', this);
     },
 
     /**
