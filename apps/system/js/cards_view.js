@@ -259,13 +259,13 @@ var CardsView = (function() {
 
       var frameForScreenshot = app.iframe;
 
-      if (PopupManager.getPopupFromOrigin(origin)) {
-        var popupFrame = PopupManager.getPopupFromOrigin(origin);
+      if (popupManager.getPopupFromOrigin(origin)) {
+        var popupFrame = popupManager.getPopupFromOrigin(origin);
         frameForScreenshot = popupFrame;
 
         var subtitle = document.createElement('p');
         subtitle.textContent =
-          PopupManager.getOpenedOriginFromOpener(origin);
+          popupManager.getOpenedOriginFromOpener(origin);
         card.appendChild(subtitle);
         card.classList.add('popup');
       } else if (getOffOrigin(app.iframe.dataset.url ?

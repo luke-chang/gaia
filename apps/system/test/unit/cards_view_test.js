@@ -36,6 +36,7 @@ suite('cards view >', function() {
 
   mocksForCardsView.attachTestHelpers();
   suiteSetup(function(done) {
+    window.popupManager = MockPopupManager;
     originalLockScreen = window.lockScreen;
     window.lockScreen = MockLockScreen;
     screenNode = document.createElement('div');
