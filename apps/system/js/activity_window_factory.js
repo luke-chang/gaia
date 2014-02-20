@@ -24,7 +24,7 @@
 
   ActivityWindowFactory.prototype = {
     /**
-     * The last created activity window instance
+     * The last created activity window instance.
      * @access private
      * @type {ActivityWindow}
      * @memberof ActivityWindowFactory.prototype
@@ -32,7 +32,7 @@
     _lastActivity: null,
 
     /**
-     * The active activity window instance
+     * The active activity window instance.
      * @access private
      * @type {ActivityWindow}
      * @memberof ActivityWindowFactory.prototype
@@ -40,7 +40,7 @@
     _activeActivity: null,
 
     /**
-     * The list of all current running activity window instances
+     * The list of all current running activity window instances.
      * @access private
      * @type {Array}
      * @memberof ActivityWindowFactory.prototype
@@ -48,7 +48,7 @@
     _activities: [],
 
     /**
-     * Indicate whether this class is started or not
+     * Indicate whether this class is started or not.
      * @access private
      * @type {Boolean}
      * @memberof ActivityWindowFactory.prototype
@@ -128,7 +128,7 @@
      */
 
     /**
-     * Instanciate activity window by configuration
+     * Instanciate activity window by configuration.
      * @param  {ActivityConfig} configuration The configuration of the activity.
      * @memberof ActivityWindowFactory.prototype
      */
