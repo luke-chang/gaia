@@ -1,0 +1,27 @@
+html, body {
+  width: 320px;
+  height: 460px;
+  margin: 0px;
+  padding: 0px;
+}
+
+.header {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	width: 320px;
+	height: 20px;
+	background-color: #C0C4DF;
+}
+.header>div {
+	padding: 0px;
+	display: inline-block;
+}
+
+#canvas {
+  background-image: url(../assets/groundtile.png);
+}
+
+#current {
+  width: 70px;
+}
