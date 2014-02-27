@@ -64,7 +64,7 @@ function init(){
 	fps = document.getElementById("current");
 	results = document.getElementById("results");
 	meter = new FPSMeter();
-	setInterval("processFrame()", 17);
+	setInterval(processFrame, 17);
 }
 
 function processFrame(){
