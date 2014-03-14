@@ -39,13 +39,15 @@
         apps[target.dataset.origin].launch(target.dataset.entry_point);
       }
     });
+
+    document.addEventListener('contextmenu', function(evt) {
+      evt.preventDefault();
+    });
   }
 
   function createLinkNode(app, entryPoint) {
-    var descriptor = buildDescriptor(app, entryPoint);
-    if (!descriptor) {
-      return null;
-    }
+    var iconsAndNameHolder =
+      entryPoint ? app.manifest.entry_points[entryPoint] : app.manifest;
 
     var li = document.createElement('li');
     var link = document.createElement('a');
@@ -53,7 +55,7 @@
 
     imgIcon.src = '/style/images/default.png';
     link.href = app.origin;
-    link.innerHTML = descriptor.name;
+    link.innerHTML = iconsAndNameHolder.name;
     link.className = 'app_link';
     link.dataset.origin = app.origin;
     link.dataset.entry_point = entryPoint || '';
@@ -62,7 +64,7 @@
     li.appendChild(link);
 
     loadIcon({
-      url: descriptor.icon,
+      url: bestMatchingIcon(app, iconsAndNameHolder),
       onsuccess: function(blob) {
         imgIcon.src = window.URL.createObjectURL(blob);
       }
@@ -124,26 +126,6 @@
     }
   }
 
-  function buildDescriptor(app, entryPoint) {
-    var iconsAndNameHolder =
-      entryPoint ? app.manifest.entry_points[entryPoint] : app.manifest;
-
-    return {
-      bookmarkURL: app.bookmarkURL,
-      manifestURL: app.manifestURL,
-      entry_point: entryPoint,
-      updateTime: app.updateTime,
-      removable: app.removable,
-      name: iconsAndNameHolder.name,
-      icon: bestMatchingIcon(app, iconsAndNameHolder),
-      useAsyncPanZoom: app.useAsyncPanZoom,
-      isHosted: isHosted(app),
-      hasOfflineCache: hasOfflineCache(app),
-      type: app.type,
-      id: app.id
-    };
-  }
-
   function bestMatchingIcon(app, manifest) {
     var max = 0;
     for (var size in manifest.icons) {
@@ -171,21 +153,6 @@
       return app.origin.slice(0, -1) + url;
 
     return app.origin + url;
-  }
-
-  function isHosted(app) {
-    if (app.origin) {
-      return app.origin.indexOf('app://') === -1;
-    }
-    return false;
-  }
-
-  function hasOfflineCache(app) {
-    if (app.type === 'collection') {
-      return true;
-    }
-    var manifest = app ? app.manifest || app.updateManifest : null;
-    return manifest.appcache_path != null;
   }
 
   function isHiddenApp(role) {
