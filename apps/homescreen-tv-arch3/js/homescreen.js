@@ -8,6 +8,12 @@
       document.getElementById('app_list_container').appendChild(docFragment);
     });
 
+    document.addEventListener('visibilitychange', function(evt) {
+      if(document.visibilityState == 'visible') {
+        appList.style.display = 'none';
+      }
+    });
+
     document.addEventListener('contextmenu', function(evt) {
       evt.preventDefault();
     });

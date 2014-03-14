@@ -27,14 +27,19 @@
   text-align: center;
 }
 
+#app_list_open_button {
+  font-size: 25px;
+}
+
 #app_list_close_button {
   margin-right: 10px;
-  background-color: transparent;
-  border: 0;
-  height: 30px;
+  display: inline-block;
   width: 30px;
+  height: 30px;
   color: white;
   outline: 0;
+  cursor: pointer;
+  text-align: center;
 }
 
 #app_list_container {
