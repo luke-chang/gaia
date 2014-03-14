@@ -32,12 +32,11 @@
       });
     };
 
-    document.addEventListener('tap', function(evt) {
+    document.addEventListener('click', function(evt) {
       var target = evt.target;
       if (target.className == 'app_link') {
         evt.preventDefault();
-        console.log(apps[target.dataset.origin]);
-        apps[target.dataset.origin].launch();
+        apps[target.dataset.origin].launch(target.dataset.entry_point);
       }
     });
   }
@@ -51,11 +50,13 @@
     var li = document.createElement('li');
     var link = document.createElement('a');
     var imgIcon = new Image();
+
     imgIcon.src = '/style/images/default.png';
     link.href = app.origin;
     link.innerHTML = descriptor.name;
     link.className = 'app_link';
     link.dataset.origin = app.origin;
+    link.dataset.entry_point = entryPoint || '';
     li.className = 'icon';
     li.appendChild(imgIcon);
     li.appendChild(link);
