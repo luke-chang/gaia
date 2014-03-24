@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+    <title>Spatial Navigation</title>
+    <script defer type="text/javascript" src="../js/vendor/evt.js"></script>
+    <script defer type="text/javascript" src="../js/spatial_navigator.js"></script>
+    <style>
+      .block {
+        position: absolute;
+        background-color: #eee;
+        font-size: 40px;
+        text-align: center;
+        opacity: 0.3;
+      }
+
+      .focus {
+        opacity: 1;
+        color: red;
+        z-index: 100;
+      }
+    </style>
+    <script>
+      window.onload = function() {
+        for (var i = 1; i <= 10; i++) {
+          var elem = document.createElement('div');
+          elem.innerHTML = elem.id = i;
+          elem.classList.add('block');
+          elem.style.left = Math.floor(Math.random() * 1024) + 'px';
+          elem.style.top = Math.floor(Math.random() * 768) + 'px';
+          elem.style.width = Math.floor(Math.random() * 150 + 50) + 'px';
+          elem.style.height = Math.floor(Math.random() * 150 + 50) + 'px';
+          elem.style.background = 'rgb(' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ')';
+          document.body.appendChild(elem);
+        }
+
+        var sn = new SpatialNavigator(document.body.getElementsByTagName('div'));
+
+        sn.on('focus', function(elem) {
+          elem.classList.add('focus');
+        });
+
+        sn.on('unfocus', function(elem) {
+          elem.classList.remove('focus');
+        });
+
+        sn.focus();
+
+        window.addEventListener('keydown', function(evt) {
+          switch(evt.key) {
+            case 'Left':
+            case 'Right':
+            case 'Up':
+            case 'Down':
+              if (!sn.move(evt.key)) {
+                console.log(evt.key + ': no elements');
+              }
+              break;
+            default:
+              return;
+          }
+          evt.preventDefault();
+        });
+      };
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  font-size: 10px;
+  overflow: hidden;
+}
+
+footer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 5rem;
+  line-height: 5rem;
+  text-align: center;
+}
+
+section {
+  width: 100%;
+  height: 100%;
+}
+
+#widget-pane {
+  position: absolute;
+  top: 5rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.selection-border {
+  position: absolute;
+  outline: solid 0.2rem yellow;
+  box-shadow: 0 0 1rem 0.2rem yellow;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  z-index: 100;
+}
+
+#main-section.app-list-shown .selection-border,
+#main-section.widget-editor-shown .selection-border {
+  display: none;
+}

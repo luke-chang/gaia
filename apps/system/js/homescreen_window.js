@@ -1,4 +1,7 @@
-(function(window) {
+/* global AppWindow, Applications, BrowserConfigHelper */
+'use strict';
+
+(function(exports) {
   /**
    * HomescreenWindow creates a instance of homescreen by give manifestURL.
    *
@@ -74,7 +77,7 @@
       var app = Applications.getByManifestURL(manifestURL);
       this.origin = app.origin;
       this.manifestURL = app.manifestURL;
-      this.url = app.origin + '/index.html#root';
+      this.url = app.origin + app.manifest.launch_path;
 
       this.browser_config =
         new BrowserConfigHelper(this.origin, this.manifestURL);
@@ -152,15 +155,26 @@
   HomescreenWindow.prototype.view = function hw_view() {
     return '<div class="appWindow homescreen" id="homescreen">' +
               '<div class="fade-overlay"></div>' +
+              '<div class="widget-overlay"></div>' +
            '</div>';
+  };
+
+  HomescreenWindow.prototype._fetchElements = function hw_fetchElements() {
+    AppWindow.prototype._fetchElements.call(this);
+    this.widgetOverlay = this.element.querySelector('.widget-overlay');
+  };
+
+  HomescreenWindow.prototype.render = function hw_render() {
+    AppWindow.prototype.render.call(this);
   };
 
   HomescreenWindow.prototype.eventPrefix = 'homescreen';
 
   HomescreenWindow.prototype.toggle = function hw_toggle(visible) {
     this.ensure();
-    if (this.browser.element)
+    if (this.browser.element) {
       this.setVisible(visible);
+    }
   };
 
   // Ensure the homescreen is loaded and return its frame.  Restarts
@@ -171,11 +185,20 @@
     if (!this.element) {
       this.render();
     } else if (reset) {
-      this.browser.element.src = this.browser_config.url + new Date();
+      this.browser.element.src = this.browser_config.url +
+        (this.browser_config.url.indexOf('#') < 0 ? '#' : '') + new Date();
     }
 
     return this.element;
   };
 
-  window.HomescreenWindow = HomescreenWindow;
-}(this));
+  HomescreenWindow.prototype.hideWidgetLayer = function hw_hideWidgetLayer() {
+    this.widgetOverlay.style.display = 'none';
+  };
+
+  HomescreenWindow.prototype.showWidgetLayer = function hw_hideWidgetLayer() {
+    this.widgetOverlay.style.display = 'block';
+  };
+
+  exports.HomescreenWindow = HomescreenWindow;
+}(window));

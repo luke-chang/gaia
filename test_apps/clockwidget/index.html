@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+    <meta charset="utf-8">
+    <title>Clock</title>
+    <link rel="stylesheet" type="text/css" href="style/clock.css">
+    <link rel="stylesheet" type="text/css" href="style/alarm.css">
+    <link rel="stylesheet" type="text/css" href="style/stopwatch.css">
+    <link rel="stylesheet" type="text/css" href="style/timer.css">
+    <link rel="stylesheet" type="text/css" href="style/views.css">
+    <link rel="stylesheet" type="text/css" href="style/form_button.css">
+    <link rel="stylesheet" type="text/css" href="style/picker/value_selector.css">
+    <link rel="stylesheet" type="text/css" href="style/picker/picker.css">
+
+    <!-- Shared styles -->
+    <link rel="stylesheet" type="text/css" href="shared/style/headers.css">
+    <link rel="stylesheet" type="text/css" href="shared/style/status.css">
+    <link rel="stylesheet" type="text/css" href="shared/style/tabs.css">
+    <!-- These are lazy loaded. Need to be included here so the build picks them up
+    <link rel="stylesheet" type="text/css" href="shared/style/input_areas.css" >
+    <link rel="stylesheet" type="text/css" href="shared/style/buttons.css" >
+    <link rel="stylesheet" type="text/css" href="shared/style/edit_mode.css" >
+    <link rel="stylesheet" type="text/css" href="shared/style/switches.css" >
+    -->
+
+    <!-- Shared sounds -->
+    <link rel="resources" type="directory" href="shared/resources/media/alarms/">
+
+    <!-- Localization -->
+    <link rel="resource" type="application/l10n" href="/shared/locales/date.ini">
+    <link rel="resource" type="application/l10n" href="locales/locales.ini">
+  </head>
+
+  <body>
+    <div id="views">
+      <div id="main-panel-wrapper">
+        <div class="active panel" data-panel-id="alarm"></div>
+      </div>
+      <form role="dialog" class="skin-dark panel hidden" data-panel-id="alarm_edit" data-type="edit">
+      </form>
+    </div>
+
+    <script data-main="js/startup.js" src="js/alameda.js"></script>
+  </body>
+</html>

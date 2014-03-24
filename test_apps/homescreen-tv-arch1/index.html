@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="shared/style/headers.css" />
+    <link rel="stylesheet" type="text/css" href="style/homescreen.css">
+    <link rel="stylesheet" type="text/css" href="style/widget_editor.css">
+    <link rel="stylesheet" type="text/css" href="style/app_list.css">
+    <script defer type="text/javascript" src="shared/js/async_storage.js"></script>
+    <script defer type="text/javascript" src="shared/js/iac_handler.js"></script>
+    <script defer type="text/javascript" src="shared/js/uuid.js"></script>
+    <script defer type="text/javascript" src="shared/js/gesture_detector.js"></script>
+    <script defer type="text/javascript" src="js/vendor/evt.js"></script>
+    <script defer type="text/javascript" src="js/system_connection.js"></script>
+    <script defer type="text/javascript" src="js/applications.js"></script>
+    <script defer type="text/javascript" src="js/app_list.js"></script>
+    <script defer type="text/javascript" src="js/homescreen.js"></script>
+    <script defer type="text/javascript" src="js/selection_border.js"></script>
+    <script defer type="text/javascript" src="js/hs_layout_editor.js"></script>
+    <script defer type="text/javascript" src="js/widget_editor.js"></script>
+    <script defer type="text/javascript" src="js/widget_manager.js"></script>
+    <script defer type="text/javascript" src="js/spatial_navigator.js"></script>
+    <script defer type="text/javascript" src="js/test_only.js"></script>
+  </head>
+  <body>
+    <section role="region" class="skin-dark" id="main-section">
+      <header>
+        <menu type="toolbar">
+          <button id="edit-widget">Edit</button>
+          <button id="app-list-open-button">Apps</button>
+        </menu>
+      </header>
+      <div id="widget-pane"></div>
+    </section>
+    <section id="app-list" hidden>
+      <div id="app-list-header">
+        <span id="app-list-close-button">X</span>
+        <span>App List</span>
+      </div>
+      <div id="app-list-container"></div>
+      <div id="app-list-page-indicator"></div>
+    </section>
+    <section id="widget-editor" hidden>
+      <header>
+        <button id="widget-editor-close">X</button>
+      </header>
+      <div id="widget-view"></div>
+    </section>
+  </body>
+</html>
