@@ -21,3 +21,6 @@ test_apps/test-wappush
 test_apps/uitest
 test_apps/uitest-privileged
 test_apps/test-fxa-client
+test_apps/homescreen-tv-arch1
+test_apps/2048widget
+test_apps/clockwidget

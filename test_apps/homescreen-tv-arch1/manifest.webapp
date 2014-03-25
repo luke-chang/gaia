@@ -1,0 +1,66 @@
+{
+  "name": "Homescreen",
+  "description": "Gaia Homescreen",
+  "launch_path": "/index.html",
+  "type": "certified",
+  "role": "homescreen",
+  "developer": {
+    "name": "The Gaia Team",
+    "url": "https://github.com/andreasgal/gaia"
+  },
+  "permissions": {
+    "mobileconnection":{},
+    "webapps-manage":{},
+    "systemXHR":{},
+    "settings":{ "access": "readwrite" },
+    "open-remote-window":{},
+    "storage":{},
+    "geolocation": {},
+    "alarms": {},
+    "power":{},
+    "contacts":{ "access": "readonly" }
+  },
+  "locales": {
+    "ar": {
+      "name": "الشاشة الرئيسية",
+      "description": "Gaia الشاشة الرئيسية"
+    },
+    "en-US": {
+      "name": "Homescreen",
+      "description": "Gaia Homescreen"
+    },
+    "fr": {
+      "name": "Écran d’accueil",
+      "description": "Écran d’accueil Gaia"
+    },
+    "zh-TW": {
+      "name": "主畫面",
+      "description": "Gaia 主畫面"
+    }
+  },
+  "default_locale": "en-US",
+  "icons": {
+    "30": "/style/icons/HomeScreen.png"
+  },
+  "orientation": "default",
+  "activities": {
+    "save-bookmark": {
+      "filters": {
+        "type": "url",
+        "url": { "required":true, "pattern":"https?:.{1,16384}" }
+      },
+      "disposition": "inline",
+      "href": "/save-bookmark.html",
+      "returnValue": true
+    }
+  },
+  "messages": [
+    { "alarm": "/index.html" }
+  ],
+  "datastores-owned": {
+    "eme_store": {
+      "access": "readwrite",
+      "description": "Stores Everything.me data"
+    }
+  }
+}

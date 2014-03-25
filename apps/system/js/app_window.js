@@ -503,9 +503,13 @@
     setTimeout(this.setFrameBackground.bind(this));
   };
 
+  AppWindow.prototype._fetchElements = function aw_fetchElements() {
+  };
+
   AppWindow.prototype.render = function aw_render() {
     this._render();
     this._registerEvents();
+    this._fetchElements();
     this.installSubComponents();
     // Pre determine the rotation degree.
     this.determineRotationDegree();

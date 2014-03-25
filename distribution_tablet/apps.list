@@ -1,6 +1,5 @@
 apps/system
 apps/settings
-apps/homescreen
 apps/bluetooth
 apps/browser
 apps/calendar
@@ -15,5 +14,8 @@ apps/music
 apps/pdfjs
 apps/video
 apps/wallpaper
+test_apps/2048widget
+test_apps/clockwidget
+test_apps/homescreen-tv-arch1
 external-apps/*
 outoftree_apps/*

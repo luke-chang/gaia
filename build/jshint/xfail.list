@@ -1029,6 +1029,7 @@ shared/js/tag_visibility_monitor.js
 shared/js/template.js
 shared/js/text_normalizer.js
 shared/js/tz_select.js
+shared/js/uuid.js
 shared/js/visibility_monitor.js
 shared/js/wifi_helper.js
 shared/resources/apn/query.js

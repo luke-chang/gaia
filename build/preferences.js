@@ -29,9 +29,8 @@ PreferencesBuilder.prototype.preparePref = function() {
   this.prefs['browser.manifestURL'] =
                    this.homescreen + '/manifest.webapp';
   this.prefs['b2g.neterror.url'] = this.homescreen + '/net_error.html';
-  if (this.homescreen.substring(0, 6) == 'app://') { // B2G bug 773884
-      this.homescreen += '/index.html';
-  }
+
+  this.homescreen += '/index.html';
   this.prefs['browser.homescreenURL'] = this.homescreen;
 
   this.domains = [];

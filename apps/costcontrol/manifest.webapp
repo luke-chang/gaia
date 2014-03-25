@@ -54,5 +54,12 @@
      { "networkstats-alarm": "/message_handler.html" },
      { "telephony-call-ended": "/message_handler.html" },
      { "notification": "/index.html" }
-   ]
+   ],
+  "connections": {
+    "homescreen-request": {
+      "handler_path": "widget.html",
+      "description": "Communication from Homescreen to System",
+      "rules": {}
+    }
+  }
 }
