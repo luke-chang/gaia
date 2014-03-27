@@ -1,7 +1,8 @@
 'use strict';
 
 (function(exports) {
-  function SpatialNavigator(collection) {
+  function SpatialNavigator(collection, rectCalcFunc) {
+    this.setRectCalcFunc(rectCalcFunc);
     this.reset(collection);
   };
 
@@ -9,6 +10,7 @@
     _DEBUG: false,
 
     _collection: null,
+    _rectCalcFunc: null,
     _focus: null,
 
     _getRect: function snGetRect(item) {
@@ -35,6 +37,15 @@
           top: parseInt(item[1]),
           width: parseInt(item[2]),
           height: parseInt(item[3])
+        };
+      } else if (this._rectCalcFunc) {
+        rect = this._rectCalcFunc(item);
+      } else {
+        rect = {
+          left: 0,
+          top: 0,
+          width: 0,
+          height: 0
         };
       }
 
@@ -130,6 +141,10 @@
       }
 
       return dest_group[0];
+    },
+
+    setRectCalcFunc: function snSetRectCalcFunc(rectCalcFunc) {
+      this._rectCalcFunc = rectCalcFunc || null;
     },
 
     reset: function snReset(collection) {

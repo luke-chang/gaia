@@ -41,7 +41,7 @@ section {
   background-color: black;
   background-image: url('images/tv.gif');
   background-size: 100% 100%;
-  transition: all 0.2s ease;
+  transition: all 0.4s ease;
 }
 
 .static-element-0.has-video {
@@ -75,8 +75,7 @@ section {
   z-index: 100;
 }
 
-#main-section.app-list-shown .selection-border,
-#main-section.widget-editor-shown .selection-border {
+.overlay-shown #main-section .selection-border {
   display: none;
 }
 

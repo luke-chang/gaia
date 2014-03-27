@@ -35,14 +35,12 @@
 
     // app list
     $('app-list-open-button').addEventListener('click', function() {
-      window.systemConnection.hideAll(function() {
+      OverlayManager.readyToOpen('app-list', function() {
         appList.show();
-        $('main-section').classList.add('app-list-shown');
       });
     });
     appList.on('closed', function() {
-      $('main-section').classList.remove('app-list-shown');
-      handleSomethingClosed();
+      OverlayManager.afterClosed('app-list');
     });
 
     // widget editor
@@ -95,10 +93,9 @@
               dom.classList.add('has-video');
             }
             staticObjectFunction[id] = function() {
-              window.systemConnection.hideAll(function() {
+              OverlayManager.readyToOpen('fullscreen', function() {
                 fullScreenElement = dom;
-                dom.classList.add('fullscreen');
-                $('main-section').classList.add('fullscreen-shown');
+                fullScreenElement.classList.add('fullscreen');
               });
             };
             break;
@@ -171,15 +168,6 @@
     });
   }
 
-  function handleSomethingClosed() {
-    // widgetEditor may ask appList to show. We need to wait for widgetEditor
-    // is hide before showAll widgets in this case.
-    if (!widgetEditor.isShown() && !appList.isShown() &&
-        fullScreenElement == null) {
-      window.systemConnection.showAll();
-    }
-  }
-
   function handleKeyEvent(evt) {
     if (appList.isShown()) {
       if (!appList.handleKeyDown(evt)) {
@@ -196,15 +184,20 @@
     } else if (fullScreenElement) {
       switch(evt.key) {
         case 'Esc':
-          $('main-section').classList.remove('fullscreen-shown');
           fullScreenElement.classList.remove('fullscreen');
           fullScreenElement = null;
-          handleSomethingClosed();
+          setTimeout(function() {
+            OverlayManager.afterClosed('fullscreen');
+          }, 200);
           break;
         default:
           return;
       }
     } else {
+      if (OverlayManager.hasOverlay()) {
+        return;
+      }
+
       switch(evt.key) {
         case 'Left':
         case 'Right':
@@ -225,10 +218,12 @@
   }
 
   function handleEnterKey(focused) {
-    if (focused === $('app-list-open-button')) {
-      $('app-list-open-button').click();
-    } else if (focused === $('edit-widget')) {
-      $('edit-widget').click();
+    if (OverlayManager.hasOverlay()) {
+      return;
+    }
+
+    if (focused === $('app-list-open-button') || focused === $('edit-widget')) {
+      focused.click();
     } else if (focused.classList &&
                focused.classList.contains('static-element')) {
       if (staticObjectFunction[focused.dataset.id]) {
@@ -240,8 +235,7 @@
   }
 
   function enterWidgetEditor() {
-    $('main-section').classList.add('widget-editor-shown');
-    window.systemConnection.hideAll(function() {
+    OverlayManager.readyToOpen('widget-editor', function() {
       $('widget-editor').hidden = false;
       widgetEditor.importConfig(widgetManager.widgetConfig);
       widgetEditor.show();
@@ -252,8 +246,7 @@
     var newConfig = widgetEditor.exportConfig();
     widgetManager.save(newConfig);
     $('widget-editor').hidden = true;
-    $('main-section').classList.remove('widget-editor-shown');
-    handleSomethingClosed();
+    OverlayManager.afterClosed('widget-editor');
   }
 
   function updateSelection(config) {
