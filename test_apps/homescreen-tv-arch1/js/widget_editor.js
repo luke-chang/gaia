@@ -1,7 +1,8 @@
 /* -*- Mode: Java; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- /
 /* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
 
-/* globals Applications, SelectionBorder, LayoutEditor, URL, SpatialNavigator */
+/* globals Applications, SelectionBorder, LayoutEditor, URL, SpatialNavigator,
+           OverlayManager */
 
 (function(exports) {
   'use strict';
@@ -9,23 +10,25 @@
   const DEFAULT_ICON = Applications.DEFAULT_ICON_URL;
 
   function WidgetEditor(options) {
-    if (!options.dom || !options.appList) {
+    if (!options.dom || !options.appList || !options.container) {
       throw new Error('WidgetEditor needs dom and appList to work.');
     }
+
     this.dom = options.dom;
+    this.container = options.container;
     this.appList = options.appList;
     this.targetSize = options.targetSize;
     this.offset = options.offset;
     this.editor = null;
     this.selectionBorder = new SelectionBorder({ multiple: false,
-                                                 container: this.dom });
+                                                 container: this.container });
   }
 
   WidgetEditor.prototype = new window.evt();
 
   WidgetEditor.prototype.start = function we_start() {
     this.editor = new LayoutEditor();
-    this.editor.init(this.dom, this.targetSize, this.offset);
+    this.editor.init(this.container, this.targetSize, this.offset);
 
     var places = [];
     for (var i = this.editor.placeHolders.length - 1; i >= 0; i--) {
@@ -43,20 +46,18 @@
     this.boundSwitchFocus = this.switchFocus.bind(this);
     Applications.on('uninstall', this.boundHandleAppRemoved);
     Applications.on('update', this.boundHandleAppUpdate);
-    this.dom.addEventListener('click', this.boundPlaceClicked);
+    this.container.addEventListener('click', this.boundPlaceClicked);
 
     // spatial navigator
     this.spatialNav = new SpatialNavigator(places);
     this.spatialNav.on('focus', this.boundSwitchFocus);
     this.spatialNav.focus();
-
-    this.dom.hidden = true;
   };
 
   WidgetEditor.prototype.stop = function we_stop() {
     Applications.off('uninstall', this.boundHandleAppRemoved);
     Applications.off('update', this.boundHandleAppUpdate);
-    this.dom.removeEventListener('touchstart', this.boundPlaceClicked);
+    this.container.removeEventListener('click', this.boundPlaceClicked);
     this.spatialNav.off('focus', this.boundSwitchFocus);
   };
 
@@ -65,10 +66,13 @@
       return;
     }
 
-    this.dom.hidden = false;
+    var self = this;
+    OverlayManager.readyToOpen('widget-editor', function() {
+      self.dom.hidden = false;
 
-    this.spatialNav.focus(this.editor.getFirstNonStatic());
-    this.fire('shown');
+      self.spatialNav.focus(self.editor.getFirstNonStatic());
+      self.fire('shown');
+    });
   };
 
   WidgetEditor.prototype.hide = function we_hide() {
@@ -78,6 +82,7 @@
 
     this.dom.hidden = true;
     this.fire('closed');
+    OverlayManager.afterClosed('widget-editor');
   };
 
   WidgetEditor.prototype.isShown = function we_isShown() {
@@ -242,7 +247,7 @@
     var found = false;
     for (var i = 0; !found && i < places.length; i++) {
       if (target === places[i].elm && !places[i].static) {
-        this.switchFocus(places[i]);
+        this.spatialNav.focus(places[i]);
         this.togglePlace();
         found = true;
       }

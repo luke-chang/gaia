@@ -5,6 +5,8 @@
 
 (function() {
   const PLAY_VIDEO = false;
+  const VIDEO_URL = 'data/video.mp4';
+
   var appList;
   var widgetEditor;
   var widgetManager;
@@ -21,17 +23,15 @@
   }
 
   function init() {
-    staticObjectPositions = [$('app-list-open-button'), $('edit-widget')];
-
     Applications.init();
-
+    // app list
     appList = new AppList();
     appList.init();
-
+    // selection border
     selectionBorder = new SelectionBorder({ multiple: false,
                                             container: $('main-section'),
                                             forground: true });
-
+    // widgetManager
     widgetManager = new WidgetManager(window.systemConnection);
     widgetManager.on('update', updateSelection);
     widgetManager.start();
@@ -49,7 +49,8 @@
     $('widget-editor').hidden = false;
     var widgetPane = $('widget-pane');
     widgetEditor = new WidgetEditor({
-                                      dom: $('widget-view'),
+                                      dom: $('widget-editor'),
+                                      container: $('widget-view'),
                                       appList: appList,
                                       offset: {
                                         top: widgetPane.offsetTop,
@@ -62,70 +63,25 @@
                                     });
     widgetEditor.on('closed', handleWidgetEditorClosed);
     widgetEditor.start();
+    widgetManager.on('update', function firstSyncWidgetManger() {
+      widgetManager.off('update', firstSyncWidgetManger);
+      widgetEditor.importConfig(widgetManager.widgetConfig);
+      console.log('sync finished');
+    });
+
     $('widget-editor').hidden = true;
 
-    $('edit-widget').addEventListener('click', enterWidgetEditor);
-    $('widget-editor-close').addEventListener('click', function() {
-      widgetEditor.hide();
-    });
+    $('edit-widget').addEventListener('click',
+                                      widgetEditor.show.bind(widgetEditor));
+    $('widget-editor-close').addEventListener('click',
+                                          widgetEditor.hide.bind(widgetEditor));
+    initStaticObjects();
 
-    var staticPane = $('main-section');
-    var staticPaneRect = staticPane.getBoundingClientRect();
-    widgetEditor.exportConfig().forEach(function(config) {
-      if (config.static) {
-        var id = config.positionId;
-        var dom = document.createElement('div');
-        dom.classList.add('static-element');
-        dom.classList.add('static-element-' + id);
-        dom.style.left = (config.x - staticPaneRect.left) + 'px';
-        dom.style.top = (config.y - staticPaneRect.top) + 'px';
-        dom.style.width = config.w + 'px';
-        dom.style.height = config.h + 'px';
-        dom.dataset.id = id;
-
-        switch (id) {
-          case 0:
-            if (PLAY_VIDEO) {
-              createVideo();
-              dom.appendChild(mainVideo);
-              dom.classList.add('has-video');
-            }
-            staticObjectFunction[id] = function() {
-              setAsFullscreen(dom);
-            };
-            break;
-          case 1:
-            staticObjectFunction[id] = function() {
-              window.open('http://www.mozilla.org', '_blank',
-                          'remote=true,useAsyncPanZoom=true');
-            };
-            break;
-        }
-
-        staticPane.appendChild(dom);
-        staticObjectPositions.push(dom);
-      }
-    });
-
+    // init spatial navigator
     spatialNav = new SpatialNavigator(staticObjectPositions);
     spatialNav.on('focus', handleSelection);
     spatialNav.focus();
 
-    document.addEventListener('visibilitychange', function(evt) {
-      if (document.visibilityState === 'visible') {
-        appList.hide();
-        if (mainVideo) {
-          mainVideo.src = 'data/video.mp4';
-          mainVideo.play();
-        }
-      } else {
-        if (mainVideo) {
-          mainVideo.pause();
-          mainVideo.removeAttribute('src');
-          mainVideo.load();
-        }
-      }
-    });
     document.addEventListener('contextmenu', function(evt) {
       evt.preventDefault();
     });
@@ -134,6 +90,62 @@
     // for testing only
     window.initFakeAppEvent();
     window.initGesture();
+  }
+
+  function initStaticObjects() {
+    staticObjectPositions = [$('app-list-open-button'), $('edit-widget')];
+
+    var staticPane = $('main-section');
+    var staticPaneRect = staticPane.getBoundingClientRect();
+    widgetEditor.exportConfig().forEach(function(config) {
+      if (!config.static) {
+        return;
+      }
+      var id = config.positionId;
+      var dom = document.createElement('div');
+      dom.classList.add('static-element');
+      dom.classList.add('static-element-' + id);
+      dom.style.left = (config.x - staticPaneRect.left) + 'px';
+      dom.style.top = (config.y - staticPaneRect.top) + 'px';
+      dom.style.width = config.w + 'px';
+      dom.style.height = config.h + 'px';
+      dom.dataset.id = id;
+
+      switch (id) {
+        case 0:
+          if (PLAY_VIDEO) {
+            createVideo(dom);
+          }
+          staticObjectFunction[id] = function() {
+            setAsFullscreen(dom);
+          };
+          break;
+        case 1:
+          staticObjectFunction[id] = function() {
+            window.open('http://www.mozilla.org', '_blank',
+                        'remote=true,useAsyncPanZoom=true');
+          };
+          break;
+      }
+
+      staticPane.appendChild(dom);
+      staticObjectPositions.push(dom);
+    });
+
+    if (PLAY_VIDEO) {
+      // we need to take care the hardware codec removal.
+      document.addEventListener('visibilitychange', function(evt) {
+        if (document.visibilityState === 'visible') {
+          appList.hide();
+          mainVideo.src = VIDEO_URL;
+          mainVideo.play();
+        } else {
+          mainVideo.pause();
+          mainVideo.removeAttribute('src');
+          mainVideo.load();
+        }
+      });
+    }
   }
 
   function setAsFullscreen(dom) {
@@ -166,34 +178,20 @@
     }, 200);
   }
 
-  function createVideo() {
+  function createVideo(dom) {
     mainVideo = document.createElement('video');
-    mainVideo.src = 'data/video.mp4';
-    mainVideo.loop = false;
+    mainVideo.src = VIDEO_URL;
+    mainVideo.mozAudioChannelType = 'content';
+    mainVideo.loop = true;
     mainVideo.controls = false;
-    mainVideo.autoPlay = true;
+    mainVideo.autoplay = true;
     mainVideo.style.width = '100%';
     mainVideo.style.height = '100%';
-    mainVideo.addEventListener('ended', function() {
-      mainVideo.currentTime = 0;
-      mainVideo.play();
-    });
-    mainVideo.addEventListener('timeupdate', function() {
-      var diff = mainVideo.duration - mainVideo.currentTime;
-      if (diff < 1) {
-        mainVideo.pause();
-        mainVideo.src = '';
-        mainVideo.load();
-        window.setTimeout(function() {
-          mainVideo.src = 'data/video.mp4';
-          mainVideo.play();
-        });
-      }
-    });
+    dom.appendChild(mainVideo);
+    dom.classList.add('has-video');
   }
 
   function convertKeyToString(evt) {
-    console.log('Trying to check key code: ' + evt.keyCode);
     switch (evt.keyCode) {
       case KeyEvent.DOM_VK_UP:
         return 'Up';
@@ -254,19 +252,9 @@
     }
   }
 
-  function enterWidgetEditor() {
-    OverlayManager.readyToOpen('widget-editor', function() {
-      $('widget-editor').hidden = false;
-      widgetEditor.importConfig(widgetManager.widgetConfig);
-      widgetEditor.show();
-    });
-  }
-
   function handleWidgetEditorClosed() {
     var newConfig = widgetEditor.exportConfig();
     widgetManager.save(newConfig);
-    $('widget-editor').hidden = true;
-    OverlayManager.afterClosed('widget-editor');
   }
 
   function updateSelection(config) {
