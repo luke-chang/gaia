@@ -19,7 +19,7 @@
     try {
       var _rb = _global.require('crypto').randomBytes;
       _rng = _rb && function() {return _rb(16);};
-    } catch(e) {}
+    } catch (e) {}
   }
 
   if (!_rng && _global.crypto && crypto.getRandomValues) {
@@ -38,7 +38,7 @@
     //
     // If all else fails, use Math.random().  It's fast, but is of unspecified
     // quality.
-    var  _rnds = new Array(16);
+    var _rnds = new Array(16);
     _rng = function() {
       for (var i = 0, r; i < 16; i++) {
         if ((i & 0x03) === 0) {
@@ -85,14 +85,14 @@
   // **`unparse()` - Convert UUID byte array (ala parse()) into a string**
   function unparse(buf, offset) {
     var i = offset || 0, bth = _byteToHex;
-    return  bth[buf[i++]] + bth[buf[i++]] +
-            bth[buf[i++]] + bth[buf[i++]] + '-' +
-            bth[buf[i++]] + bth[buf[i++]] + '-' +
-            bth[buf[i++]] + bth[buf[i++]] + '-' +
-            bth[buf[i++]] + bth[buf[i++]] + '-' +
-            bth[buf[i++]] + bth[buf[i++]] +
-            bth[buf[i++]] + bth[buf[i++]] +
-            bth[buf[i++]] + bth[buf[i++]];
+    return bth[buf[i++]] + bth[buf[i++]] +
+           bth[buf[i++]] + bth[buf[i++]] + '-' +
+           bth[buf[i++]] + bth[buf[i++]] + '-' +
+           bth[buf[i++]] + bth[buf[i++]] + '-' +
+           bth[buf[i++]] + bth[buf[i++]] + '-' +
+           bth[buf[i++]] + bth[buf[i++]] +
+           bth[buf[i++]] + bth[buf[i++]] +
+           bth[buf[i++]] + bth[buf[i++]];
   }
 
   // **`v1()` - Generate time-based UUID**
@@ -135,7 +135,7 @@
     var nsecs = options.nsecs != null ? options.nsecs : _lastNSecs + 1;
 
     // Time since last uuid creation (in msecs)
-    var dt = (msecs - _lastMSecs) + (nsecs - _lastNSecs)/10000;
+    var dt = (msecs -_lastMSecs) + (nsecs - lastNSecs) / 10000;
 
     // Per 4.2.1.2, Bump clockseq on clock regression
     if (dt < 0 && options.clockseq == null) {
