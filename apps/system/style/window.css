@@ -428,6 +428,10 @@
   pointer-events: none;
 }
 
+.appWindow > .widget-overlay iframe {
+  pointer-events: auto;
+}
+
 .appWindow > .chrome {
   z-index: 5;
 }
