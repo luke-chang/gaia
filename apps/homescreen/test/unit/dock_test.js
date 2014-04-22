@@ -6,6 +6,7 @@ requireApp('homescreen/test/unit/mock_page.js');
 
 require('/shared/js/screen_layout.js');
 requireApp('homescreen/js/dock.js');
+requireApp('homescreen/js/screen_helper.js');
 
 var mocksHelper = new MocksHelper([
   'Page',
@@ -122,9 +123,11 @@ suite('dock.js >', function() {
     });
   });
 
-  suite('with more than 4 icons >', function() {
+  suite('with more than 6 icons >', function() {
     setup(function() {
       MockPage.mIcons = [
+        new MockIcon(),
+        new MockIcon(),
         new MockIcon(),
         new MockIcon(),
         new MockIcon(),
