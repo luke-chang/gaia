@@ -56,6 +56,16 @@ var DockManager = (function() {
           }
         }
 
+        console.log('995886 > ontouchmove: numApps=' + numApps);
+        console.log('995886 > ontouchmove: maxNumAppInViewPort=' +
+          maxNumAppInViewPort);
+        console.log('995886 > ontouchmove: windowWidth=' + windowWidth);
+        console.log('995886 > ontouchmove: initialOffsetLeft=' +
+          initialOffsetLeft);
+        console.log('995886 > ontouchmove: initialOffsetRight=' +
+          initialOffsetRight);
+        console.log('995886 > ontouchmove: deltaX=' + deltaX);
+
         // Dock is fixed for 4 or less apps
         if (numApps <= maxNumAppInViewPort) {
           return;
@@ -80,6 +90,10 @@ var DockManager = (function() {
             deltaX = -initialOffsetLeft;
           }
         }
+
+        console.log('995886 > ontouchmove: initialOffsetLeft=' +
+          initialOffsetLeft);
+        console.log('995886 > ontouchmove: deltaX=' + deltaX);
 
         dock.moveBy(initialOffsetLeft + deltaX);
         break;
@@ -119,6 +133,9 @@ var DockManager = (function() {
   function goNextSet() {
     calculateDimentions(dock.getNumIcons());
 
+    console.log('995886 > goNextSet: dock.getLeft()=' + dock.getLeft());
+    console.log('995886 > goNextSet: maxOffsetLeft=' + maxOffsetLeft);
+
     if (dock.getLeft() <= maxOffsetLeft) {
       return;
     }
@@ -129,6 +146,8 @@ var DockManager = (function() {
   function goPreviousSet() {
     calculateDimentions(dock.getNumIcons());
 
+    console.log('995886 > goPreviousSet: dock.getLeft()=' + dock.getLeft());
+
     if (dock.getLeft() >= 0) {
       return;
     }
@@ -137,12 +156,23 @@ var DockManager = (function() {
   }
 
   function onTouchEnd(scrollX) {
+    console.log('995886 > onTouchEnd: dock.getNumIcons()=' +
+      dock.getNumIcons());
+    console.log('995886 > onTouchEnd: maxNumAppInViewPort=' +
+      maxNumAppInViewPort);
+    console.log('995886 > onTouchEnd: dock.getLeft()=' + dock.getLeft());
+    console.log('995886 > onTouchEnd: dock.getRight()=' + dock.getRight());
+    console.log('995886 > onTouchEnd: windowWidth=' + windowWidth);
+
     if (dock.getNumIcons() <= maxNumAppInViewPort ||
           dock.getLeft() === 0 || dock.getRight() === windowWidth) {
       // No animation
       delete document.body.dataset.transitioning;
       return;
     }
+
+    console.log('995886 > onTouchEnd: scrollX=' + scrollX);
+    console.log('995886 > onTouchEnd: maxOffsetLeft=' + maxOffsetLeft);
 
     dock.moveByWithEffect(scrollX > 0 ? 0 : maxOffsetLeft, duration);
     container.addEventListener('transitionend', function transEnd(e) {
@@ -162,12 +192,21 @@ var DockManager = (function() {
   }
 
   function rePosition(numApps, callback) {
+    console.log('995886 > rePosition: numApps=' + numApps);
+    console.log('995886 > rePosition: maxNumAppInViewPort=' +
+      maxNumAppInViewPort);
+    console.log('995886 > rePosition: dock.getLeft()=' + dock.getLeft());
+    console.log('995886 > rePosition: dock.getRight()=' + dock.getRight());
+    console.log('995886 > rePosition: windowWidth=' + windowWidth);
+
     if (numApps > maxNumAppInViewPort && dock.getLeft() < 0 &&
           dock.getRight() > windowWidth) {
       // The dock takes up the screen width.
       callback && setTimeout(callback);
       return;
     }
+
+    console.log('995886 > rePosition: maxOffsetLeft=' + maxOffsetLeft);
 
     // We are going to place the dock in the middle of the screen
     document.body.dataset.transitioning = 'true';
@@ -228,7 +267,12 @@ var DockManager = (function() {
 
       calculateDimentions(numIcons);
 
+      console.log('995886 > init: numIcons=' + numIcons);
+      console.log('995886 > init: maxNumAppInViewPort=' + maxNumAppInViewPort);
+
       if (numIcons <= maxNumAppInViewPort) {
+        console.log('995886 > init: maxOffsetLeft=' + maxOffsetLeft);
+
         dock.moveBy(maxOffsetLeft / 2);
       }
 

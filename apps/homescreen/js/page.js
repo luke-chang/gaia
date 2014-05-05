@@ -777,6 +777,8 @@ Page.prototype = {
    * @param{int} duration
    */
   moveByWithEffect: function pg_moveByWithEffect(scrollX, duration) {
+    console.log('995886 > Page.moveByWithEffect: scrollX=' + scrollX);
+
     var container = this.movableContainer;
     var style = container.style;
     style.MozTransform = 'translateX(' + scrollX + 'px)';
@@ -789,6 +791,8 @@ Page.prototype = {
    * @param{int} scroll X
    */
   moveBy: function pg_moveBy(scrollX) {
+    console.log('995886 > Page.moveBy: scrollX=' + scrollX);
+
     var style = this.movableContainer.style;
     style.MozTransform = 'translateX(' + scrollX + 'px)';
     style.MozTransition = '';
@@ -1281,6 +1285,8 @@ dockProto.render = function dk_render(apps, target) {
 };
 
 dockProto.moveByWithEffect = function dk_moveByWithEffect(scrollX, duration) {
+  console.log('995886 > dockProto.moveByWithEffect: scrollX=' + scrollX);
+
   var container = this.movableContainer;
   var style = container.style;
   style.MozTransform = 'translateX(' + scrollX + 'px)';
@@ -1289,6 +1295,9 @@ dockProto.moveByWithEffect = function dk_moveByWithEffect(scrollX, duration) {
 
 dockProto.moveByWithDuration = function dk_moveByWithDuration(scrollX,
                                                               duration) {
+
+  console.log('995886 > dockProto.moveByWithDuration: scrollX=' + scrollX);
+
   var style = this.movableContainer.style;
   style.MozTransform = 'translateX(' + scrollX + 'px)';
   style.MozTransition = '-moz-transform ' + duration + 'ms ease';
