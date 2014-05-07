@@ -164,6 +164,59 @@
       return groups;
     },
 
+    _getDistanceFunction: function snGetDistanceFunction(target_rect) {
+      return {
+        nearPlumbLineIsBetter: function(rect) {
+          var d;
+          if (rect.center.x < target_rect.center.x) {
+            d = target_rect.center.x - rect.right;
+          } else {
+            d = rect.left - target_rect.center.x;
+          }
+          return d < 0 ? 0 : d;
+        },
+        nearHorizonIsBetter: function(rect) {
+          var d;
+          if (rect.center.y < target_rect.center.y) {
+            d = target_rect.center.y - rect.bottom;
+          } else {
+            d = rect.top - target_rect.center.y;
+          }
+          return d < 0 ? 0 : d;
+        },
+        nearTargetLeftIsBetter: function(rect) {
+          var d;
+          if (rect.center.x < target_rect.center.x) {
+            d = target_rect.left - rect.right;
+          } else {
+            d = rect.left - target_rect.left;
+          }
+          return d < 0 ? 0 : d;
+        },
+        nearTargetTopIsBetter: function(rect) {
+          var d;
+          if (rect.center.y < target_rect.center.y) {
+            d = target_rect.top - rect.bottom;
+          } else {
+            d = rect.top - target_rect.top;
+          }
+          return d < 0 ? 0 : d;
+        },
+        topIsBetter: function(rect) {
+          return rect.top;
+        },
+        bottomIsBetter: function(rect) {
+          return -1 * rect.bottom;
+        },
+        leftIsBetter: function(rect) {
+          return rect.left;
+        },
+        rightIsBetter: function(rect) {
+          return -1 * rect.right;
+        }
+      };
+    },
+
     _prioritize: function snPrioritize(priority) {
       var dest_group = null;
       var distance = [];
@@ -296,6 +349,7 @@
      *
      * It will trigger "unfocus" event.
      *
+     * @return {Boolean} true if succeed.
      * @memberof SpatialNavigator.prototype
      */
     unfocus: function snUnfocus() {
@@ -361,14 +415,13 @@
     },
 
     /**
-     * Get a element which best fits the given target element and the direction.
+     * Get a element which best fits the given target element and direction.
      *
-     * @param {SpatialNavigatorElement} target
-     *        The origin of coordinates for traversal.
-     * @param {String} direction
-     *        It should be "left", "right", "up" or "down".
-     * @return {SpatialNavigatorElement}
-     *         The destination of the element which has the highest priority.
+     * @param {SpatialNavigatorElement} target The origin of coordinates for
+     *                                         traversal.
+     * @param {String} direction It should be "left", "right", "up" or "down".
+     * @return {SpatialNavigatorElement} The destination of the element which
+     *                                   has the highest priority.
      * @memberof SpatialNavigator.prototype
      */
     navigate: function snNavigate(target, direction) {
@@ -376,176 +429,67 @@
         return null;
       }
 
+      direction = direction.toLowerCase();
+
       var rects = this._getAllRectsExcept(target);
       var target_rect = this._getRect(target);
       var groups = this._demarcate(rects, target_rect);
       var internal_groups = this._demarcate(groups[4], target_rect.center);
+      var distance_function = this._getDistanceFunction(target_rect);
+      var gid, gdistance, gdistance_oblique;
 
-      var nearPlumbLineIsBetter = function(rect) {
-        var d;
-        if (rect.center.x < target_rect.center.x) {
-          d = target_rect.center.x - rect.right;
-        } else {
-          d = rect.left - target_rect.center.x;
-        }
-        return d < 0 ? 0 : d;
-      };
-      var nearHorizonIsBetter = function(rect) {
-        var d;
-        if (rect.center.y < target_rect.center.y) {
-          d = target_rect.center.y - rect.bottom;
-        } else {
-          d = rect.top - target_rect.center.y;
-        }
-        return d < 0 ? 0 : d;
-      };
-      var nearTargetLeftIsBetter = function(rect) {
-        var d;
-        if (rect.center.x < target_rect.center.x) {
-          d = target_rect.left - rect.right;
-        } else {
-          d = rect.left - target_rect.left;
-        }
-        return d < 0 ? 0 : d;
-      };
-      var nearTargetTopIsBetter = function(rect) {
-        var d;
-        if (rect.center.y < target_rect.center.y) {
-          d = target_rect.top - rect.bottom;
-        } else {
-          d = rect.top - target_rect.top;
-        }
-        return d < 0 ? 0 : d;
-      };
-      var topIsBetter = function(rect) {
-        return rect.top;
-      };
-      var bottomIsBetter = function(rect) {
-        return -1 * rect.bottom;
-      };
-      var leftIsBetter = function(rect) {
-        return rect.left;
-      };
-      var rightIsBetter = function(rect) {
-        return -1 * rect.right;
-      };
-      var priority;
-
-      switch (direction.toLowerCase()) {
+      switch (direction) {
         case 'left':
-          priority = [
-            {
-              group: internal_groups[0].concat(internal_groups[3])
-                                       .concat(internal_groups[6]),
-              distance: [
-                nearPlumbLineIsBetter,
-                topIsBetter
-              ]
-            },
-            {
-              group: groups[3],
-              distance: [
-                nearPlumbLineIsBetter,
-                topIsBetter
-              ]
-            },
-            {
-              group: groups[0].concat(groups[6]),
-              distance: [
-                nearHorizonIsBetter,
-                rightIsBetter,
-                nearTargetTopIsBetter
-              ]
-            }
-          ];
-          break;
         case 'right':
-          priority = [
-            {
-              group: internal_groups[2].concat(internal_groups[5])
-                                       .concat(internal_groups[8]),
-              distance: [
-                nearPlumbLineIsBetter,
-                topIsBetter
-              ]
-            },
-            {
-              group: groups[5],
-              distance: [
-                nearPlumbLineIsBetter,
-                topIsBetter
-              ]
-            },
-            {
-              group: groups[2].concat(groups[8]),
-              distance: [
-                nearHorizonIsBetter,
-                leftIsBetter,
-                nearTargetTopIsBetter
-              ]
-            }
+          gid = (direction == 'left' ? [3, 0, 6] : [5, 2, 8]);
+          gdistance = [
+            distance_function.nearPlumbLineIsBetter,
+            distance_function.topIsBetter
+          ];
+          gdistance_oblique = [
+            distance_function.nearHorizonIsBetter,
+            (direction == 'left' ?
+              distance_function.rightIsBetter :
+              distance_function.leftIsBetter),
+            distance_function.nearTargetTopIsBetter
           ];
           break;
         case 'up':
-          priority = [
-            {
-              group: internal_groups[0].concat(internal_groups[1])
-                                       .concat(internal_groups[2]),
-              distance: [
-                nearHorizonIsBetter,
-                leftIsBetter
-              ]
-            },
-            {
-              group: groups[1],
-              distance: [
-                nearHorizonIsBetter,
-                leftIsBetter
-              ]
-            },
-            {
-              group: groups[0].concat(groups[2]),
-              distance: [
-                nearPlumbLineIsBetter,
-                bottomIsBetter,
-                nearTargetLeftIsBetter
-              ]
-            }
-          ];
-          break;
         case 'down':
-          priority = [
-            {
-              group: internal_groups[6].concat(internal_groups[7])
-                                       .concat(internal_groups[8]),
-              distance: [
-                nearHorizonIsBetter,
-                leftIsBetter
-              ]
-            },
-            {
-              group: groups[7],
-              distance: [
-                nearHorizonIsBetter,
-                leftIsBetter
-              ]
-            },
-            {
-              group: groups[6].concat(groups[8]),
-              distance: [
-                nearPlumbLineIsBetter,
-                topIsBetter,
-                nearTargetLeftIsBetter
-              ]
-            }
+          gid = (direction == 'up' ? [1, 0, 2] : [7, 6, 8]);
+          gdistance = [
+            distance_function.nearHorizonIsBetter,
+            distance_function.leftIsBetter
+          ];
+          gdistance_oblique = [
+            distance_function.nearPlumbLineIsBetter,
+            (direction == 'up' ?
+              distance_function.bottomIsBetter :
+              distance_function.topIsBetter),
+            distance_function.nearTargetLeftIsBetter
           ];
           break;
         default:
-          return;
+          return null;
       }
 
-      if (this._crossOnly) {
-        priority.pop();
+      var priority = [
+        {
+          group: internal_groups[gid[0]].concat(internal_groups[gid[1]])
+                                        .concat(internal_groups[gid[2]]),
+          distance: gdistance
+        },
+        {
+          group: groups[gid[0]],
+          distance: gdistance
+        }
+      ];
+
+      if (!this._crossOnly) {
+        priority.push({
+          group: groups[gid[1]].concat(groups[gid[2]]),
+          distance: gdistance_oblique
+        });
       }
 
       var dest = this._prioritize(priority);
