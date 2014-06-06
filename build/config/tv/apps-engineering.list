@@ -19,3 +19,5 @@ apps/marketplace.firefox.com
 outoftree_apps/*
 dev_apps/test-agent
 dev_apps/homescreen-stingray
+dev_apps/just-test
+dev_apps/uitest

@@ -12,7 +12,7 @@
 
   function Homescreen(options) {
     options = options || {};
-    this._videoURL = options.demoVideo || VIDEO_URL;
+    this._videoURL = '';
   }
 
   Homescreen.prototype = {
