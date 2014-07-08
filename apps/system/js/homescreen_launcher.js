@@ -68,6 +68,7 @@
     handleEvent: function hl_handleEvent(evt) {
       switch (evt.type) {
         case 'trusteduishow':
+          console.log('bug1032693: fadeIn() in trusteduishow');
           this.getHomescreen().toggle(true);
           this.getHomescreen().fadeIn();
           break;
@@ -78,16 +79,19 @@
           // Fade out homescreen if the opening app is landscape.
           if (evt.detail.rotatingDegree === 90 ||
               evt.detail.rotatingDegree === 270) {
+            console.log('bug1032693: fadeOut() in appopening');
             this.getHomescreen().fadeOut();
           }
           break;
         case 'cardviewbeforeshow':
           // Fade out the homescreen before showing the cards view to avoid
           // having it bleed through during the transition animation.
+          console.log('bug1032693: fadeOut() in cardviewbeforeshow');
           this.getHomescreen().fadeOut();
           break;
         case 'cardviewbeforeclose':
           // Fade homescreen back in before the cards view closes.
+          console.log('bug1032693: fadeIn() in cardviewbeforeclose');
           this.getHomescreen().fadeIn();
           break;
       }
