@@ -2,7 +2,7 @@
 'use strict';
 
 (function(exports) {
-  var DEBUG = true;
+  var DEBUG = false;
   var _id = 0;
 
   /**

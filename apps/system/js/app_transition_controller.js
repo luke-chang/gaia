@@ -1,7 +1,7 @@
 'use strict';
 
 (function(window) {
-  var DEBUG = true;
+  var DEBUG = false;
   var TransitionEvents = ['open', 'close', 'complete', 'timeout'];
   var screenElement = document.getElementById('screen');
 
@@ -191,14 +191,10 @@
 
   AppTransitionController.prototype.handle_opening =
     function atc_handle_opening() {
-      console.log('bug1032693: handle_opening');
-
       if (!this.app || !this.app.element)
         return;
       this.app.reviveBrowser();
       this.app.launchTime = Date.now();
-
-      console.log('bug1032693: fadeIn() in handle_opening');
       this.app.fadeIn();
       this.app.element.removeAttribute('aria-hidden');
       this.app.setVisible(true);
@@ -212,8 +208,6 @@
 
   AppTransitionController.prototype.handle_opened =
     function atc_handle_opened() {
-      console.log('bug1032693: handle_opened');
-
       if (!this.app || !this.app.element)
         return;
 
@@ -228,8 +222,6 @@
 
       this.resetTransition();
       this.app.element.removeAttribute('aria-hidden');
-
-      console.log('bug1032693: active in handle_opened');
       this.app.element.classList.add('active');
       this.app.setVisible(true);
 
