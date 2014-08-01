@@ -46,6 +46,9 @@ var MediaAppAgent = {
   },
 
   _handleMemorypressure: function maa_handleMemorypressure(event) {
+    if (WindowManager.getDisplayedApp() == this.origin)
+      return;
+
     switch (this.playStatus) {
       case 'STOPPED':
         WindowManager.kill(this.origin);
