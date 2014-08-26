@@ -40,9 +40,9 @@
 }
 
 .multiline-recipients-mode.new .flex-composer {
-  top: 5.5rem;
+  top: 5.4rem;
 
-  height: calc(100% - 5.5rem);
+  height: calc(100% - 5.4rem);
 }
 
 #messages-container {

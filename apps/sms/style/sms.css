@@ -590,7 +590,7 @@ section[role="region"].new .subheader {
   z-index: 6;
 
   display: none;
-  min-height: 5.5rem;
+  min-height: 5.4rem;
 
   text-align: left;
   color: black;
@@ -601,7 +601,7 @@ section[role="region"].new .subheader {
 }
 
 .multiline-recipients-mode #messages-to-field {
-  transform: translateY(calc(-100% + 5.5rem));
+  transform: translateY(calc(-100% + 5.4rem));
 }
 
 section[role="region"].new #messages-to-field {
