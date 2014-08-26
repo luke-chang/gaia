@@ -1,0 +1,21 @@
+html, body {
+  background-color: white;
+  font-size: 10px;
+}
+
+h1 {
+  margin-bottom: 5rem;
+}
+
+#test {
+  min-height: 5.5rem;
+  font-size: 1.465rem;
+  transform: translateY(calc(-100% + 4rem));
+}
+
+#test2 {
+  width: 1.7rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background-color: #B80404;
+}
