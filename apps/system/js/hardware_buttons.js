@@ -244,7 +244,24 @@
         return;
       case 'volume-up-button-press':
       case 'volume-down-button-press':
-        this.hardwareButtons.setState('volume', type);
+        //this.hardwareButtons.setState('volume', type);
+
+        (function() {
+          var appMgmt = navigator.mozApps.mgmt;
+
+          appMgmt.getAll().onsuccess = function onsuccess(event) {
+            event.target.result.forEach(function eachApp(app) {
+              switch(app.manifestURL) {
+              case 'app://camera.gaiamobile.org/manifest.webapp':
+              case 'app://video.gaiamobile.org/manifest.webapp':
+                setTimeout(function() {
+                  app.launch();
+                }, 500);
+                break;
+              }
+            });
+          };
+        })();
         return;
       case 'home-button-release':
       case 'sleep-button-release':

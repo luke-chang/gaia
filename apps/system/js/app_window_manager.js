@@ -1,6 +1,6 @@
 'use strict';
 (function(window) {
-  var DEBUG = false;
+  var DEBUG = true;
   var screenElement = document.getElementById('screen');
 
   /**
@@ -138,7 +138,8 @@
      */
     switchApp: function awm_switchApp(appCurrent, appNext, switching,
                                       openAnimation, closeAnimation) {
-      this.debug('before ready check' + appCurrent + appNext);
+      this.debug('before ready check ' +
+        (appCurrent ? appCurrent.origin : 'null') + ', ' + appNext.origin);
       appNext.ready(function() {
         if (appNext.isDead()) {
           // The app was killed while we were opening it,
@@ -147,7 +148,8 @@
             HomescreenLauncher.origin : appCurrent.origin);
           return;
         }
-        this.debug('ready to open/close' + switching);
+        this.debug('ready to open/close (' + switching + ') ' +
+          (appCurrent ? appCurrent.origin : 'null') + ', ' + appNext.origin);
         if (switching)
           HomescreenLauncher.getHomescreen().fadeOut();
 
@@ -531,7 +533,7 @@
     _updateActiveApp: function awm__changeActiveApp(origin) {
       this.displayedApp = origin;
       this._activeApp = this.runningApps[this.displayedApp];
-      this.debug(origin + this._activeApp.isFullScreen());
+      this.debug(origin + ' ' + this._activeApp.isFullScreen());
       if (this._activeApp.isFullScreen()) {
         screenElement.classList.add('fullscreen-app');
       } else {

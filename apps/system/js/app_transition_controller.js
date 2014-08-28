@@ -194,6 +194,7 @@
 
       this.app.setVisible(false, true);
       this.app.element.setAttribute('aria-hidden', 'true');
+      this.app.debug('remove active');
       this.app.element.classList.remove('active');
     };
 
@@ -230,6 +231,7 @@
 
       this.resetTransition();
       this.app.element.removeAttribute('aria-hidden');
+      this.app.debug('add active');
       this.app.element.classList.add('active');
       this.app.setVisible(true);
 
