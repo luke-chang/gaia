@@ -46,9 +46,5 @@ var MockAppWindowManager = {
   },
 
   broadcastMessage: function() {
-  },
-
-  isBusyLaunching: function() {
-    return false;
   }
 };

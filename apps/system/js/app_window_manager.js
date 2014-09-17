@@ -61,14 +61,6 @@
     // note: the id is instanceID instead of origin here.
     _apps: {},
 
-    isBusyLaunching: function() {
-      return this._launchingApp;
-    },
-
-    _launchingApp: false,
-
-    LAUNCHING_APP_TIMEOUT: 1000,
-
     /**
      * Switch to a different app
      * @param {String} origin The origin of the new app.
@@ -103,11 +95,6 @@
 
       if (document.mozFullScreen) {
         document.mozCancelFullScreen();
-      }
-
-      window.clearTimeout(this._launchingAppTimer);
-      if (!appNext.isHomescreen) {
-        this._launchingApp = true;
       }
 
       screenElement.classList.remove('fullscreen-app');
@@ -154,10 +141,6 @@
       this.debug('before ready check ' +
         (appCurrent ? appCurrent.origin : 'null') + ', ' + appNext.origin);
       appNext.ready(function() {
-        this._launchingAppTimer = setTimeout(function() {
-          this._launchingApp = false;
-        }.bind(this), this.LAUNCHING_APP_TIMEOUT);
-
         if (appNext.isDead()) {
           // The app was killed while we were opening it,
           // let's not switch to a dead app!
@@ -446,12 +429,6 @@
         case 'launchapp':
           var config = evt.detail;
           this.debug('launching' + config.origin);
-          if (this._launchingApp ||
-              (activeApp && activeApp.isTransitioning())) {
-            this.debug(
-              'Block the app launching request due to busy launching.');
-            return;
-          }
           this.launch(config);
           break;
       }
