@@ -61,6 +61,8 @@
     // note: the id is instanceID instead of origin here.
     _apps: {},
 
+    _readyCallbackQueue: [],
+
     /**
      * Switch to a different app
      * @param {String} origin The origin of the new app.
@@ -140,7 +142,8 @@
                                       openAnimation, closeAnimation) {
       this.debug('before ready check ' +
         (appCurrent ? appCurrent.origin : 'null') + ', ' + appNext.origin);
-      appNext.ready(function() {
+
+      var func = (function() {
         if (appNext.isDead()) {
           // The app was killed while we were opening it,
           // let's not switch to a dead app!
@@ -176,6 +179,39 @@
             ((switching === true) ? 'invoking' : closeAnimation));
         } else {
           this.debug('No current running app!');
+        }
+      }).bind(this);
+
+      this._readyCallbackQueue.push({
+        func: func,
+        ready: false
+      });
+
+      appNext.ready(function() {
+        var cb = false;
+
+        for (var i = 0; i < this._readyCallbackQueue.length; i++) {
+          var q = this._readyCallbackQueue[i];
+
+          if (!cb) {
+            if (q.func === func) {
+              if (i === 0) {
+                this._readyCallbackQueue.shift().func();
+                i--;
+                cb = true;
+              } else {
+                q.ready = true;
+                break;
+              }
+            }
+          } else {
+            if (q.ready) {
+              this._readyCallbackQueue.shift().func();
+              i--;
+            } else {
+              break;
+            }
+          }
         }
       }.bind(this));
     },
