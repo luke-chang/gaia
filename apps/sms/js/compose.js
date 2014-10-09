@@ -259,8 +259,17 @@ var Compose = (function() {
           var newNode = item.render();
           attachments.set(newNode, item);
           if (dom.message.contains(node)) {
+            newNode.style.position = 'absolute';
+            newNode.style.top = node.offsetTop + 'px';
+            newNode.style.left = node.offsetLeft + 'px';
             dom.message.insertBefore(newNode, node);
-            dom.message.removeChild(node);
+
+            setTimeout(function() {
+              newNode.style.position = '';
+              newNode.style.top = '';
+              newNode.style.left = '';
+              dom.message.removeChild(node);
+            }, 3000);
           }
           imageSized();
         });
