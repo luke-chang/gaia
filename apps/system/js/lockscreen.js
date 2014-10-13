@@ -808,7 +808,8 @@
 
     this.overlay.classList.remove('unlocked');
     this.overlay.hidden = false;
-    screen.mozLockOrientation(window.OrientationManager.defaultOrientation);
+    var ret = screen.mozLockOrientation(window.OrientationManager.defaultOrientation);
+    console.log('luke: mozLockOrientation(' + window.OrientationManager.defaultOrientation + ') in lockscreen.js: ' + ret);
 
     if (!wasAlreadyLocked) {
       if (document.mozFullScreen) {

@@ -1315,6 +1315,8 @@
                       OrientationManager.globalOrientation;
     if (orientation) {
       var rv = screen.mozLockOrientation(orientation);
+      console.log('luke: mozLockOrientation(' + orientation + ') in app_window.js: ' + rv);
+
       if (rv === false) {
         console.warn('screen.mozLockOrientation() returned false for',
                      this.origin, 'orientation', orientation);

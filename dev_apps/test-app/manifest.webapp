@@ -1,0 +1,16 @@
+{
+  "name": "Test App",
+  "description": "Test App",
+  "launch_path": "/index.html",
+  "icons": {
+    "120": "/icon-120.png"
+  },
+  "developer": {
+    "url": "https://github.com/mozilla-b2g/gaia",
+    "name": "The Gaia Team"
+  },
+  "default_locale": "en",
+  "permissions": {
+  },
+  "fullscreen": "true"
+}
