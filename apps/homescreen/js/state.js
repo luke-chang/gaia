@@ -27,6 +27,42 @@ const HomeState = (function() {
     }, error);
   }
 
+  function updateDB(iterator, success, error) {
+    var grid = Configurator.getSection('grid') || [];
+
+    // add the collection page (v1.3 new) from the configurator
+    for (var i = 0; i < grid.length; i++) {
+      grid[i] = {
+        index: i,
+        icons: grid[i]
+      };
+    }
+
+    // Get the grid pages from the state saved in IndexedDB.
+    HomeState.getGrid(function eachPage(pageState) {
+      // First 'page' is the dock.
+      if (pageState.index === 0) {
+        grid[pageState.index] = {
+          index: pageState.index,
+          icons: pageState.icons
+        };
+        return;
+      }
+
+      grid[pageState.index + 1] = {
+        index: pageState.index + 1,
+        icons: pageState.icons
+      };
+    }, function onSuccess() {
+      HomeState.saveGrid(grid, function onSaveGrid() {
+        grid.forEach(iterator);
+        success();
+      }, error);
+    }, function onError(error) {
+      error();
+    });
+  }
+
   function openDB(success, error) {
     try {
       var indexedDB = window.indexedDB || window.webkitIndexedDB ||
@@ -43,6 +79,7 @@ const HomeState = (function() {
 
     var request;
     var emptyDB = false;
+    var upgradeDB = false;
 
     try {
       request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -53,7 +90,7 @@ const HomeState = (function() {
 
     request.onsuccess = function(event) {
       database = event.target.result;
-      success(emptyDB);
+      success(emptyDB, upgradeDB);
     };
 
     request.onerror = function(event) {
@@ -74,6 +111,7 @@ const HomeState = (function() {
           // this wouldn't be enough
           if (!db.objectStoreNames.contains(SV_APP_STORE_NAME)) {
             db.createObjectStore(SV_APP_STORE_NAME, { keyPath: 'manifest' });
+            upgradeDB = true;
           }
       }
     };
@@ -152,11 +190,18 @@ const HomeState = (function() {
      * success callback.
      */
     init: function st_init(iteratorGrid, success, error, iteratorSVApps) {
-      openDB(function(emptyDB) {
+      openDB(function(emptyDB, upgradeDB) {
         if (emptyDB) {
           loadInitialState(iteratorGrid, success, error);
           return;
         }
+
+        if (upgradeDB) {
+          updateDB(iteratorGrid, success, error);
+          HomeState.getSVApps(iteratorSVApps);
+          return;
+        }
+
         HomeState.getGrid(iteratorGrid, success, error);
         HomeState.getSVApps(iteratorSVApps);
       }, error);
