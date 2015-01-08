@@ -201,9 +201,10 @@
     },
 
     showHomeApp: function hwm_showHomeApp() {
+      var hasActiveHome = !!this._activeHome;
       var originApp = AppWindowManager.getActiveApp();
       var homeApp = this.getHomescreen(true);
-      if (originApp.instanceID === homeApp.instanceID) {
+      if (hasActiveHome && originApp.instanceID === homeApp.instanceID) {
         // If we open an activity at home and press home, the originApp is home
         // app and the next app is also home app. In this case, we don't need
         // to reopen it again.

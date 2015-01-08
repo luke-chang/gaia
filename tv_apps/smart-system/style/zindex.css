@@ -247,7 +247,8 @@
   z-index: 16;
 }
 
-#screen > [data-z-index-level="app"] > .appWindow.homescreen.active {
+#screen > [data-z-index-level="app"] > .appWindow.homescreen.active,
+#screen > [data-z-index-level="dashboard-bar"] {
   z-index: 14;
 }
 
