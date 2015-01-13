@@ -249,6 +249,7 @@
       // May have orientation manager to deal with lock orientation request.
       if (this.app.isHomescreen ||
           this.app.isCallscreenWindow) {
+        console.log('luke: 1');
         this.app.setOrientation();
       }
     };
@@ -269,6 +270,7 @@
       // TODO:
       // May have orientation manager to deal with lock orientation request.
       if (!this.app.isCallscreenWindow) {
+        console.log('luke: 2');
         this.app.setOrientation();
       }
       this.focusApp();
