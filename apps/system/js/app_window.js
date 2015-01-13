@@ -186,6 +186,8 @@
    */
   AppWindow.prototype.setVisible =
     function aw_setVisible(visible) {
+      console.log('luke: ' + this.name + ' -> setVisible(' + visible + ')');
+
       this.debug('set visibility -> ', visible);
       this.setVisibleForScreenReader(visible);
       if (visible) {
@@ -1315,6 +1317,9 @@
     var orientation = manifest ? (manifest.orientation ||
                       OrientationManager.globalOrientation) :
                       OrientationManager.globalOrientation;
+
+    console.log('luke: lockOrientation: ' + this.name + ', ' + orientation);
+
     if (orientation) {
       var rv = screen.mozLockOrientation(orientation);
       if (rv === false) {

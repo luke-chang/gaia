@@ -153,6 +153,7 @@
           'setVisible' in this.browser.element) {
         this.debug('setVisible on browser element:' + visible);
         this.browser.element.setVisible(visible);
+        console.log('luke: _setVisible');
       }
     },
 
