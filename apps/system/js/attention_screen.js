@@ -92,6 +92,8 @@ var AttentionScreen = {
 
   // show the attention screen overlay with newly created frame
   open: function as_open(evt) {
+    console.log('bug1119112: evt.detail.features=' + evt.detail.features);
+
     if (evt.detail.features != 'attention')
       return;
 
@@ -106,6 +108,9 @@ var AttentionScreen = {
     // Check if the app has the permission to open attention screens
     var manifestURL = evt.target.getAttribute('mozapp');
     var app = applications.getByManifestURL(manifestURL);
+
+    console.log('bug1119112: this._hasAttentionPermission(app)=' +
+      this._hasAttentionPermission(app));
 
     if (!app || !this._hasAttentionPermission(app))
       return;
@@ -149,6 +154,9 @@ var AttentionScreen = {
       // be invoked by airplane mode toggle before the call is established.
       this.dispatchEvent('callscreenwillopen');
     }
+
+    console.log('bug1119112: this.isVisible()=' + this.isVisible());
+    console.log('bug1119112: this.isFullyVisible()=' + this.isFullyVisible());
 
     // Make the overlay visible if we are not displayed yet.
     // alternatively, if the newly appended frame is the visible frame

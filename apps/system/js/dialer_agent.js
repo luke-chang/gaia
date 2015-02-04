@@ -118,6 +118,8 @@
   };
 
   DialerAgent.prototype.handleEvent = function da_handleEvent(evt) {
+    console.log('bug1119112: evt.type=' + evt.type);
+
     if (evt.type === 'sleep' || evt.type === 'volumedown') {
       this._stopAlerting();
       return;
@@ -128,14 +130,18 @@
     }
 
     var calls = this._telephony.calls;
+    console.log('bug1119112: calls.length=' + calls.length);
     if (calls.length !== 1) {
       return;
     }
 
+    console.log('bug1119112: calls[0].state=' + calls[0].state);
     if (calls[0].state === 'incoming' || calls[0].state === 'dialing') {
+      console.log('bug1119112: this._openCallScreen();');
       this._openCallScreen();
     }
 
+    console.log('bug1119112: this._alerting=' + this._alerting);
     if (this._alerting || calls[0].state !== 'incoming') {
       return;
     }
@@ -193,6 +199,8 @@
   };
 
   DialerAgent.prototype._openCallScreen = function da_openCallScreen() {
+    console.log('bug1119112: _openCallScreen');
+
     var callScreen = this._callScreen;
     var timestamp = new Date().getTime();
 
