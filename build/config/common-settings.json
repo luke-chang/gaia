@@ -58,6 +58,7 @@
    "cmas.enabled": [true, true],
    "copypaste.enabled": true,
    "multiscreen.enabled": false,
+   "multiscreen.debugging.enabled": false,
    "debug.console.enabled": false,
    "developer.menu.enabled": false,
    "debug.oop.disabled": false,

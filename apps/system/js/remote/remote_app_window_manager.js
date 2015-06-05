@@ -15,7 +15,7 @@
   ];
 
   BaseModule.create(RemoteAppWindowManager, {
-    DEBUG: false,
+    DEBUG: true,
 
     name: 'RemoteAppWindowManager',
 

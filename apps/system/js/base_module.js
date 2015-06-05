@@ -555,6 +555,15 @@
         if (this.TRACE) {
           console.trace();
         }
+
+        var logDiv = document.getElementById('multiscreen-log');
+        if (logDiv &&
+            !logDiv.hidden &&
+            arguments[0] != 'handling mozChromeEvent') {
+          window.msLogs = window.msLogs ? window.msLogs.slice(0, 49) : [];
+          window.msLogs.unshift('[' + this.name + '] ' + arguments[0]);
+          logDiv.innerHTML = window.msLogs.join('<br>');
+        }
       } else if (window.DUMP) {
         DUMP('[' + this.name + ']' +
           '[' + this.service.currentTime() + '] ' +

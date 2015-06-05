@@ -10,7 +10,7 @@
   ];
 
   BaseModule.create(MessageController, {
-    DEBUG: false,
+    DEBUG: true,
 
     name: 'MessageController',
 
@@ -31,6 +31,10 @@
 
       this.broadcastChannel = new BroadcastChannel('multiscreen');
       this.broadcastChannel.addEventListener('message', this);
+
+      setInterval(() => {
+        this.postMessage('ping');
+      }, 5000);
     },
 
     _stop: function() {

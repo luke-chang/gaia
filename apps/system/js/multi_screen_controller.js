@@ -10,7 +10,8 @@
     'mozChromeEvent'
   ];
   MultiScreenController.SETTINGS = [
-    'multiscreen.enabled'
+    'multiscreen.enabled',
+    'multiscreen.debugging.enabled'
   ];
   MultiScreenController.STATES = [
     'enabled'
@@ -19,7 +20,7 @@
     name: 'MultiScreenController',
 
     EVENT_PREFIX: 'remote-',
-    DEBUG: false,
+    DEBUG: true,
 
     enabled: function() {
       return this._enabled;
@@ -198,6 +199,10 @@
       } else {
         window.removeEventListener('mozChromeEvent', this);
       }
+    },
+    '_observe_multiscreen.debugging.enabled': function(value) {
+      var logDiv = document.getElementById('multiscreen-log');
+      logDiv.hidden = !value;
     }
   });
 }());
