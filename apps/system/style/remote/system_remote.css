@@ -77,3 +77,22 @@ textarea,
   overflow: scroll;
   font-weight: normal;
 }
+
+#cursor {
+  z-index: 100000000;
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  margin-left: -30px;
+  margin-top: -30px;
+  background-image: url("../../resources/images/firey-cursor.png");
+  background-size: 60px 60px;
+  background-repeat: no-repeat;
+}
+
+#cursor.visible {
+  display: inline-block;
+}

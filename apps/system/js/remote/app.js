@@ -9,7 +9,8 @@
     'SettingsCore',
     'WallpaperManager',
     'remote/RemoteAppWindowManager',
-    'remote/MessageController'
+    'remote/MessageController',
+    'remote/RemoteCursor'
   ];
 
   App.SETTINGS = [

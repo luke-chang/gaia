@@ -559,7 +559,9 @@
         var logDiv = document.getElementById('multiscreen-log');
         if (logDiv &&
             !logDiv.hidden &&
-            arguments[0] != 'handling mozChromeEvent') {
+            arguments[0] != 'handling mozChromeEvent' &&
+            arguments[0] != 'handling message' &&
+            arguments[0].indexOf('remotetouch') < 0) {
           window.msLogs = window.msLogs ? window.msLogs.slice(0, 49) : [];
           window.msLogs.unshift('[' + this.name + '] ' + arguments[0]);
           logDiv.innerHTML = window.msLogs.join('<br>');

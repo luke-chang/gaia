@@ -7,7 +7,8 @@
 
   RemoteAppWindowManager.SERVICES = [
     'launchApp',
-    'killCurrentApp'
+    'killCurrentApp',
+    'simulateClick'
   ];
 
   // An empty EVENTS is necessary for triggering EventMixin in BaseModule.
@@ -68,6 +69,16 @@
       this.currentApp = null;
 
       this.debug('current app is killed');
+    },
+
+    simulateClick: function(x, y) {
+      if (!this.currentApp) {
+        return;
+      }
+
+      this.debug('simulateClick: (' + x + ', ' + y + ')');
+      this.currentApp.element.sendMouseEvent('mousedown', x, y, 0, 1, 0);
+      this.currentApp.element.sendMouseEvent('mouseup', x, y, 0, 1, 0);
     },
 
     _start: function() {

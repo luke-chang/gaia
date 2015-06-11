@@ -44,12 +44,15 @@
 
     _handle_message: function(evt) {
       var data = evt.data;
-      if (data.target !== this.displayId) {
+      if (data.target !== this.displayId && data.target !== -1) {
         return;
       }
-      this.debug('[#' + this.displayId + '] ' +
-        'got message from local system: ' + data.type +
-        ', ' + JSON.stringify(data.detail));
+
+      if (data.type != 'remote-touch') {
+        this.debug('[#' + this.displayId + '] ' +
+          'got message from local system: ' + data.type +
+          ', ' + JSON.stringify(data.detail));
+      }
 
       switch(data.type) {
         case 'launch-app':
@@ -63,6 +66,9 @@
               reason: reason
             });
           });
+          break;
+        case 'remote-touch':
+          this.publish('remotetouch', data.detail, true);
           break;
       }
     }

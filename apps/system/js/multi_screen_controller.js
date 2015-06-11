@@ -3,9 +3,14 @@
 
 (function() {
   var MultiScreenController = function() {};
-  MultiScreenController.SERVICES = [
-    'chooseDisplay'
+  MultiScreenController.SUB_MODULES = [
+    'RemoteTouchPanel'
   ];
+  MultiScreenController.SERVICES = [
+    'chooseDisplay',
+    'remoteTouch'
+  ];
+
   MultiScreenController.EVENTS = [
     'mozChromeEvent'
   ];
@@ -110,13 +115,34 @@
       });
     },
     postMessage: function(target, type, detail) {
-      this.debug('broadcast message to #' + target + ': ' +
-        type + ', ' + JSON.stringify(detail));
+      if (type != 'remote-touch') {
+        this.debug('broadcast message to #' + target + ': ' +
+          type + ', ' + JSON.stringify(detail));
+      }
 
       this.broadcastChannel.postMessage({
         target: target,
         type: type,
         detail: detail
+      });
+    },
+    remoteTouch: function(evt) {
+      var touch =
+        (evt.type == 'touchend') ? evt.changedTouches[0] : evt.touches[0];
+
+      this.postMessage(-1, 'remote-touch', {
+        type: evt.type,
+        touch: {
+          pageX: touch.pageX,
+          pageY: touch.pageY,
+          identifier: touch.identifier,
+          radiusX: touch.radiusX,
+          radiusY: touch.radiusY,
+          rotationAngle: touch.rotationAngle,
+          force: touch.force,
+          width: screen.width,
+          height: screen.height
+        }
       });
     },
     _start: function() {
