@@ -7,6 +7,7 @@
     'RemoteTouchPanel'
   ];
   MultiScreenController.SERVICES = [
+    'queryExternalDisplays',
     'chooseDisplay',
     'remoteTouch'
   ];

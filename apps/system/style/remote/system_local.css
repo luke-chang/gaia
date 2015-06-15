@@ -10,6 +10,7 @@
   font-size: 8px;
   overflow: scroll;
   font-weight: normal;
+  pointer-events: none;
 }
 
 #pseudo-touch-panel {

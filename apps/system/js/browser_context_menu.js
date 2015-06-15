@@ -284,7 +284,18 @@
           callback: this.shareUrl.bind(this, config.url)
         });
 
-        finish();
+        Service.request('queryExternalDisplays').then((displays) => {
+          if (displays.length) {
+            menuData.push({
+              id: 'open-in-external-display',
+              label: 'Open in external display',
+              callback: function() {
+                Service.request('chooseDisplay', config);
+              }
+            });
+          }
+          finish();
+        }).catch(finish);
       });
     }
   });
