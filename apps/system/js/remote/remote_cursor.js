@@ -11,7 +11,7 @@
 
   BaseModule.create(RemoteCursor, {
     name: 'RemoteCursor',
-    DEBUG: false,
+    DEBUG: true,
 
     update: function(x, y) {
       this.show();
@@ -53,15 +53,15 @@
       var touch = evt.detail.touch;
       var ox = touch.pageX;
       var oy = touch.pageY;
-      var ow = touch.width;
+      //var ow = touch.width;
       var oh = touch.height;
-      var nw = this.screen.width;
+      //var nw = this.screen.width;
       var nh = this.screen.height;
-      var nx = nh*ox/oh;
-      var ny = nh*oy/oh;
+      var nx = nh * ox / oh;
+      var ny = nh * oy / oh;
 
-      this.debug(type + ': x=' + nx + ', y=' + ny);
-      this.debug(JSON.stringify(touch));
+      //this.debug(type + ': x=' + nx + ', y=' + ny);
+      //this.debug(JSON.stringify(touch));
 
       switch (type) {
         case 'touchstart':
@@ -70,11 +70,27 @@
           this._StartTime = Date.now();
           break;
         case 'touchmove':
+          /*var tmpX = this.cursorX + nx - this._startX;
+          if (tmpX > this.screen.width) {
+            nx -= tmpX - this.screen.width;
+          } else if (tmpX < 0) {
+            nx -= tmpX;
+          }
+
+          var tmpY = this.cursorY + ny - this._startY;
+          if (tmpY > this.screen.height) {
+            ny -= tmpY - this.screen.height;
+          } else if (tmpY < 0) {
+            ny -= tmpY;
+          }*/
+
           this.update(nx - this._startX, ny - this._startY);
           break;
         case 'touchend':
           this.cursorX = this.cursorX + nx - this._startX;
           this.cursorY = this.cursorY + ny - this._startY;
+          this.debug('(' + Math.round(this.cursorX) + ', ' +
+                           Math.round(this.cursorY) + ')');
           break;
       }
 
