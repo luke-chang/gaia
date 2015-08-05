@@ -65,7 +65,7 @@ textarea,
 }
 
 #multiscreen-log {
-  z-index: 2147483647 !important;
+  z-index: 2147483647;
   position: absolute;
   left: 0;
   top: 0;
@@ -102,4 +102,12 @@ textarea,
   box-sizing: border-box;
   width: 100%;
   height: 100%;
+}
+
+#testonly div {
+  position: absolute;
+  border: blue solid 1px;
+  width: 10px;
+  height: 10px;
+  overflow: hidden;
 }

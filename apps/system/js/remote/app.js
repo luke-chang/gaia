@@ -37,6 +37,38 @@
         parseInt(window.location.hash.substring(1), 10) :
         -1;
       this.debug('displayId: ' + this._displayId);
+
+      (function() {
+        var container = document.getElementById('testonly');
+        var interval = 15;
+        var elem;
+
+        for(var i = 0; i < 40; i++) {
+          elem = document.createElement('div');
+          elem.style.left = i + 'px';
+          elem.style.top = (i * interval) + 'px';
+          elem.innerHTML = i;
+          container.appendChild(elem);
+
+          elem = document.createElement('div');
+          elem.style.right = i + 'px';
+          elem.style.top = (i * interval) + 'px';
+          elem.innerHTML = i;
+          container.appendChild(elem);
+
+          elem = document.createElement('div');
+          elem.style.left = (i * interval) + 'px';
+          elem.style.top = i + 'px';
+          elem.innerHTML = i;
+          container.appendChild(elem);
+
+          elem = document.createElement('div');
+          elem.style.left = (i * interval) + 'px';
+          elem.style.bottom = i + 'px';
+          elem.innerHTML = i;
+          container.appendChild(elem);
+        }
+      })();
     },
 
     '_observe_multiscreen.debugging.enabled': function(value) {
