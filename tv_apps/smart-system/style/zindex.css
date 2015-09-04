@@ -29,6 +29,10 @@
   z-index: 2147483647;
 }
 
+#screen > [data-z-index-level="mouse-cursor"] {
+  z-index: 2147483647;
+}
+
 #screen > *[data-z-index-level="poweroff-splash"] {
   z-index: 65536;
 }
