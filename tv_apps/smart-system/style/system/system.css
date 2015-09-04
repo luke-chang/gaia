@@ -364,3 +364,13 @@ body {
     background: url(../themes/default/images/ui/menu_bg.png) no-repeat;
   }
 }
+
+#screen > #mouse-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: none;
+  font-size: 50px;
+  margin: -23px 0 0 -8px;
+  color: orange;
+}
