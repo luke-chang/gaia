@@ -37,6 +37,12 @@
       'volumedown': 'volume-down-button'
     }),
     _getLowerCaseKeyName: function bkem_getLowerCaseKeyName(event) {
+      if (event.key == 'Unidentified') {
+        switch (event.keyCode) {
+          case window.KeyEvent.DOM_VK_HOME:
+            return 'home';
+        }
+      }
       return event.key && event.key.toLowerCase();
     },
     _isSystemOnlyKey: function bkem_isSystemOnlyKey(event) {
