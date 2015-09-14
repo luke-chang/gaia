@@ -20,6 +20,7 @@
     this.runningLayouts = {};
 
     this._onDebug = false;
+    this._activeFrame = null;
   };
 
   InputFrameManager.prototype._debug = function ifm__debug(msg) {
@@ -29,15 +30,25 @@
   };
 
   InputFrameManager.prototype.start = function ifm_start() {
-
+    window.addEventListener('remote-control-event', this);
   };
 
   InputFrameManager.prototype.stop = function ifm_stop() {
-
+    window.removeEventListener('remote-control-event', this);
   };
 
   InputFrameManager.prototype.handleEvent = function ifm_handleEvent(evt) {
-    this._keyboardManager.resizeKeyboard(evt);
+    switch (evt.type) {
+      case 'remote-control-event':
+        var detail = evt.detail;
+        if (detail.action != 'grant-input' || !this._activeFrame) {
+          return;
+        }
+        this._activeFrame.setInputMethodActive(!detail.value);
+        break;
+      default:
+        this._keyboardManager.resizeKeyboard(evt);
+    }
   };
 
   InputFrameManager.prototype.setupFrame = function ifm_setupFrame(layout) {
@@ -74,6 +85,7 @@
     }
     if (frame.setInputMethodActive) {
       frame.setInputMethodActive(active);
+      this._activeFrame = active ? frame : null;
     }
 
     this._keyboardManager.setHasActiveKeyboard(active);
