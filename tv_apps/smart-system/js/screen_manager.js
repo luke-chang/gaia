@@ -140,7 +140,7 @@ var ScreenManager = {
     }
 
     this._firstOn = false;
-    SettingsCache.observe('screen.timeout', 60,
+    SettingsCache.observe('screen.timeout', 0,
     function screenTimeoutChanged(value) {
       if (typeof value !== 'number') {
         value = parseInt(value);

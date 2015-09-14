@@ -1,3 +1,4 @@
 {
- "homescreen.appName": "smart-home"
+ "homescreen.appName": "smart-home",
+ "screen.timeout": 0
 }
