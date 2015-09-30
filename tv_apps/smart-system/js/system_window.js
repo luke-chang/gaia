@@ -19,15 +19,19 @@
     'mozSystemWindowChromeEvent'
   ];
 
+  SystemWindow.SUB_MODULES = [
+    'AudioChannelService'
+  ];
+
   BaseModule.create(SystemWindow, {
     name: 'SystemWindow',
     EVENT_PREFIX: 'systemwindow',
-    DEBUG: false,
+    DEBUG: true,
     // The fake app window ID of System app.
     instanceID: null,
     // The audio channels belong to System app.
     audioChannels: null,
-    // Know an AppWindow object is for System app or other apps. 
+    // Know an AppWindow object is for System app or other apps.
     isSystem: true,
 
     /**
@@ -36,7 +40,7 @@
     _start: function() {
       this.instanceID = 'systemAppID';
       this.audioChannels = new Map();
-    },    
+    },
 
     /**
      * Handle mozSystemWindowChromeEvent event.

@@ -1,5 +1,4 @@
-/* global BaseModule */
-/* global Service, AppWindowManager */
+/* global BaseModule, AppWindowManager */
 'use strict';
 
 (function() {
@@ -16,7 +15,6 @@
   AudioChannelService.EVENTS = [
     'audiochannelstatechanged',
     'audiochanneldestroyed',
-    'hierarchytopmostwindowchanged',
     'systemwindowaudiochannelsregistered',
     'appopened',
     'appclosed'
@@ -28,7 +26,7 @@
 
   BaseModule.create(AudioChannelService, {
     name: 'AudioChannelService',
-    DEBUG: false,
+    DEBUG: true,
     // If true, all audio channels of System app are muted.
     _isSystemMuted: false,
     // A map contains playing audio channels.

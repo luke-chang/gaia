@@ -11,7 +11,7 @@
   };
 
   Core.SUB_MODULES = [
-    'AudioChannelService'
+    'SystemWindow'
   ];
 
   Core.SERVICES = [
