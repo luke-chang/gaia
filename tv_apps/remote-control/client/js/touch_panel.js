@@ -1,265 +1,306 @@
-/* global jQuery */
 'use strict';
 
-(function($) {
+(function(exports) {
   var DEBUG = false;
 
-  $.fn.touchPanel = function(options) {
-    if (options) {
-      if ($.isFunction(options)) {
-        options = {
-          handler: options
-        };
-      } else if (!$.isPlainObject(options)) {
-        console.log('touchPanel: Invalid parameters!');
-        return $(this);
-      }
+  function TouchPanel(touchPanel, options) {
+    if (typeof options === 'function') {
+      options = {
+        handler: options
+      };
+    } else if (!options || typeof options !== 'object') {
+      options = {};
     }
 
-    var settings = $.extend({
-      touchReportPeriod: 60,      // milliseconds
-      dblClickTimeThreshold: 250, // milliseconds
-      clickTimeThreshold: 100,    // milliseconds
-      clickMoveThreshold: 5,      // pixels
-      swipeMoveThreshold: 25,     // pixels
-      touchingClass: null,        // class name
-      handler: null               // function(type, detail) {}
-    }, options);
+    this.options = {
+      touchReportPeriod: options.touchReportPeriod || 60,          // ms
+      dblClickTimeThreshold: options.dblClickTimeThreshold || 250, // ms
+      clickTimeThreshold: options.clickTimeThreshold || 200,       // ms
+      clickMoveThreshold: options.clickMoveThreshold || 10,        // pixels
+      swipeMoveThreshold: options.swipeMoveThreshold || 25,        // pixels
+      touchingClass: options.touchingClass || null                 // class name
+    };
 
-    if (!settings.handler) {
-      settings.handler = function() {};
+    if (options.handler) {
+      this._handler = options.handler.bind(touchPanel);
+    } else {
+      this._handler = function(type, detail) {};
     }
 
-    return $(this).each(function() {
-      var waitForClickTimer, identifier, pendingEvent;
-      var startX, startY, panelX, panelY, panelWidth, panelHeight;
-      var prevDx, prevDy, hasMouseDown;
-      var timer, pendingClickTimer, startTime;
+    this._domTouchPanel = touchPanel;
 
-      var $touchPanel = $(this);
-      var sendMessage = $.proxy(settings.handler, $touchPanel);
+    this._hasMouseDown = false;
+    this._startX = 0;
+    this._startY = 0;
+    this._prevDx = null;
+    this._prevDy = null;
+    this._startTime = 0;
+    this._waitForClickTimer = null;
+    this._pendingClickTimer = null;
+    this._reportTimer = null;
+    this._pendingEvent = null;
+    this._identifier = null;
+    this._panelX = 0;
+    this._panelY = 0;
+    this._panelWidth = 0;
+    this._panelHeight = 0;
 
-      $(window).mouseup(function(evt) {
-        if (hasMouseDown && evt.button === 0) {
-          hasMouseDown = false;
-          onEnd(evt.clientX, evt.clientY);
-        }
-      });
+    this._domTouchPanel.addEventListener('mousedown', this);
+    window.addEventListener('mousemove', this);
+    window.addEventListener('mouseup', this);
 
-      $touchPanel.mousedown(function(evt) {
-        if (evt.button !== 0) {
-          return true;
-        }
-        hasMouseDown = true;
-        return onStart(evt.clientX, evt.clientY);
-      })
-      .mousemove(function(evt) {
-        if (! hasMouseDown) {
-          return true;
-        }
-        return onMove(evt.clientX, evt.clientY);
-      })
-      .mouseup(function(evt) {
-        if (! hasMouseDown || evt.button !== 0) {
-          return true;
-        }
-        hasMouseDown = false;
-        return onEnd(evt.clientX, evt.clientY);
-      })
-      .bind('touchstart', function(evt) {
-        if (identifier !== undefined) {
-          return false;
-        }
-        var touches = evt.originalEvent.changedTouches;
-        if (touches.length > 1) {
-          return true;
-        }
-        var touch = touches[0];
-        identifier = touch.identifier;
-        return onStart(touch.pageX - panelX, touch.pageY - panelY);
-      })
-      .bind('touchmove touchend', function(evt) {
-        var touches = $.grep(evt.originalEvent.changedTouches, function(elem) {
-          return elem.identifier == identifier;
-        });
+    this._domTouchPanel.addEventListener('touchstart', this);
+    this._domTouchPanel.addEventListener('touchmove', this);
+    this._domTouchPanel.addEventListener('touchend', this);
 
-        if (touches.length != 1) {
-          return false;
-        }
+    window.addEventListener('resize', this);
+    this.updatePanelInfo();
+  }
 
-        var touch = touches[0];
-        if (evt.type == 'touchend') {
-          identifier = undefined;
-          return onEnd(touch.pageX - panelX, touch.pageY - panelY);
-        }
-        return onMove(touch.pageX - panelX, touch.pageY - panelY);
-      });
+  TouchPanel.prototype = {
+    uninit: function() {
+      window.removeEventListener('resize', this);
 
-      function onStart(x, y) {
-        if (settings.touchingClass) {
-          $touchPanel.addClass(settings.touchingClass);
-        }
+      this._domTouchPanel.removeEventListener('touchend', this);
+      this._domTouchPanel.removeEventListener('touchmove', this);
+      this._domTouchPanel.removeEventListener('touchstart', this);
 
-        startX = x;
-        startY = y;
-        startTime = $.now();
+      window.removeEventListener('mouseup', this);
+      window.removeEventListener('mousemove', this);
+      this._domTouchPanel.removeEventListener('mousedown', this);
 
-        var handleTouchStart = function() {
-          waitForClickTimer = null;
-          handleTouch('touchstart', 0, 0);
-        };
+      this._domTouchPanel = null;
+      this._handler = null;
+      this.options = null;
+    },
 
-        if (settings.clickTimeThreshold) {
-          waitForClickTimer = setTimeout(handleTouchStart,
-            settings.clickTimeThreshold);
-        } else {
-          handleTouchStart();
-        }
+    updatePanelInfo: function() {
+      var rect = this._domTouchPanel.getBoundingClientRect();
+      this._panelX = Math.round(rect.left);
+      this._panelY = Math.round(rect.top);
+      this._panelWidth = rect.width;
+      this._panelHeight = rect.height;
+    },
 
-        return false;
-      }
+    handleEvent: function(evt) {
+      var touches, touch;
 
-      function onMove(x, y) {
-        var dx = x - startX;
-        var dy = y - startY;
-
-        if (waitForClickTimer) {
-          if (Math.abs(dx) <= settings.clickMoveThreshold &&
-              Math.abs(dy) <= settings.clickMoveThreshold) {
-            return false;
+      switch(evt.type) {
+        case 'resize':
+          this.updatePanelInfo();
+          break;
+        case 'mousedown':
+          if (evt.button === 0) {
+            this._hasMouseDown = true;
+            this.onStart(evt.clientX, evt.clientY);
+            evt.preventDefault();
           }
-          clearTimeout(waitForClickTimer);
-          waitForClickTimer = null;
-          handleTouch('touchstart', 0, 0);
-        }
-
-        handleTouch('touchmove', dx, dy);
-        return false;
-      }
-
-      function onEnd(x, y) {
-        var dx = x - startX;
-        var dy = y - startY;
-
-        if (waitForClickTimer) {
-          clearTimeout(waitForClickTimer);
-          waitForClickTimer = null;
-
-          if (settings.dblClickTimeThreshold) {
-            if (pendingClickTimer) {
-              clearTimeout(pendingClickTimer);
-              pendingClickTimer = null;
-              handleTouch('dblclick');
+          break;
+        case 'mousemove':
+          if (this._hasMouseDown) {
+            this.onMove(evt.clientX, evt.clientY);
+            evt.preventDefault();
+          }
+          break;
+        case 'mouseup':
+          if (this._hasMouseDown && evt.button === 0) {
+            this._hasMouseDown = false;
+            this.onEnd(evt.clientX, evt.clientY);
+            evt.preventDefault();
+          }
+          break;
+        case 'touchstart':
+          if (this._identifier !== null) {
+            evt.preventDefault();
+            return;
+          }
+          touches = evt.changedTouches;
+          if (touches.length == 1) {
+            touch = touches[0];
+            this._identifier = touch.identifier;
+            this.onStart(touch.pageX - this._panelX,
+                         touch.pageY - this._panelY);
+            evt.preventDefault();
+          }
+          break;
+        case 'touchmove':
+        case 'touchend':
+          touches = evt.changedTouches;
+          touch = null;
+          for(var i = 0; i < touches.length; i++) {
+            if (touches[i].identifier == this._identifier) {
+              touch = touches[i];
+              break;
+            }
+          }
+          if (touch) {
+            if (evt.type == 'touchend') {
+              this._identifier = null;
+              this.onEnd(touch.pageX - this._panelX,
+                         touch.pageY - this._panelY);
             } else {
-              pendingClickTimer = setTimeout(function() {
-                pendingClickTimer = null;
-                handleTouch('click');
-              }, settings.dblClickTimeThreshold);
-            }
-          } else {
-            handleTouch('click');
-          }
-        } else {
-          var direction;
-          var distance = Math.round(Math.sqrt(dx * dx + dy * dy));
-          if (distance >= settings.swipeMoveThreshold) {
-            var angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            if (angle < 0) {
-              angle += 360;
-            }
-            if (angle >= 315 || angle < 45) {
-              direction = 'right';
-            } else if (angle >= 45 && angle < 135) {
-              direction = 'down';
-            } else if (angle >= 135 && angle < 225) {
-              direction = 'left';
-            } else if (angle >= 225 && angle < 315) {
-              direction = 'up';
+              this.onMove(touch.pageX - this._panelX,
+                          touch.pageY - this._panelY);
             }
           }
+          evt.preventDefault();
+          break;
+      }
+    },
 
-          handleTouch('touchend', dx, dy, direction);
-        }
-
-        if (settings.touchingClass) {
-          $touchPanel.removeClass(settings.touchingClass);
-        }
-
-        return false;
+    onStart: function(x, y) {
+      if (this.options.touchingClass) {
+        this._domTouchPanel.classList.add(this.options.touchingClass);
       }
 
-      function handleTouch(type, dx, dy, swipe) {
-        if (DEBUG) {
-          console.log('[touchPanel] handling ' + type);
+      this._startX = x;
+      this._startY = y;
+      this._startTime = Date.now();
+
+      var handleTouchStart = function() {
+        this._waitForClickTimer = null;
+        this.handleTouch('touchstart', 0, 0);
+      }.bind(this);
+
+      if (this.options.clickTimeThreshold) {
+        this._waitForClickTimer = setTimeout(handleTouchStart,
+          this.options.clickTimeThreshold);
+      } else {
+        handleTouchStart();
+      }
+    },
+
+    onMove: function(x, y) {
+      var dx = x - this._startX;
+      var dy = y - this._startY;
+
+      if (this._waitForClickTimer) {
+        var clickMoveThreshold = this.options.clickMoveThreshold;
+        if (Math.abs(dx) <= clickMoveThreshold &&
+            Math.abs(dy) <= clickMoveThreshold) {
+          return;
+        }
+        clearTimeout(this._waitForClickTimer);
+        this._waitForClickTimer = null;
+        this.handleTouch('touchstart', 0, 0);
+      }
+
+      this.handleTouch('touchmove', dx, dy);
+    },
+
+    onEnd: function(x, y) {
+      var dx = x - this._startX;
+      var dy = y - this._startY;
+
+      if (this._waitForClickTimer) {
+        clearTimeout(this._waitForClickTimer);
+        this._waitForClickTimer = null;
+
+        if (this.options.dblClickTimeThreshold) {
+          if (this._pendingClickTimer) {
+            clearTimeout(this._pendingClickTimer);
+            this._pendingClickTimer = null;
+            this.handleTouch('dblclick');
+          } else {
+            this._pendingClickTimer = setTimeout(function() {
+              this._pendingClickTimer = null;
+              this.handleTouch('click');
+            }.bind(this), this.options.dblClickTimeThreshold);
+          }
+        } else {
+          this.handleTouch('click');
+        }
+      } else {
+        var direction;
+        var distance = Math.round(Math.sqrt(dx * dx + dy * dy));
+        if (distance >= this.options.swipeMoveThreshold) {
+          var angle = Math.atan2(dy, dx) * 180 / Math.PI;
+          if (angle < 0) {
+            angle += 360;
+          }
+          if (angle >= 315 || angle < 45) {
+            direction = 'right';
+          } else if (angle >= 45 && angle < 135) {
+            direction = 'down';
+          } else if (angle >= 135 && angle < 225) {
+            direction = 'left';
+          } else if (angle >= 225 && angle < 315) {
+            direction = 'up';
+          }
         }
 
-        switch (type) {
-          case 'touchstart':
-            prevDx = undefined;
-            prevDy = undefined;
+        this.handleTouch('touchend', dx, dy, direction);
+      }
 
-            sendMessage(type, {
-              width: panelWidth,
-              height: panelHeight
-            });
+      if (this.options.touchingClass) {
+        this._domTouchPanel.classList.remove(this.options.touchingClass);
+      }
+    },
 
-            timer = setInterval(function() {
-              if (pendingEvent) {
-                sendMessage(
-                  pendingEvent.type,
-                  pendingEvent.detail
-                );
-                pendingEvent = null;
-              }
-            }, settings.touchReportPeriod);
+    handleTouch: function(type, dx, dy, swipe) {
+      if (DEBUG) {
+        console.log('[touchPanel] handling ' + type);
+      }
 
-            break;
-          case 'touchmove':
-            if (dx === prevDx && dy === prevDy) {
-              return;
+      switch (type) {
+        case 'touchstart':
+          this._prevDx = undefined;
+          this._prevDy = undefined;
+
+          this._handler(type, {
+            width: this._panelWidth,
+            height: this._panelHeight
+          });
+
+          this._reportTimer = setInterval(function() {
+            if (this._pendingEvent) {
+              this._handler(
+                this._pendingEvent.type,
+                this._pendingEvent.detail
+              );
+              this._pendingEvent = null;
             }
+          }.bind(this), this.options.touchReportPeriod);
 
-            prevDx = dx;
-            prevDy = dy;
+          break;
+        case 'touchmove':
+          if (dx === this._prevDx && dy === this._prevDy) {
+            return;
+          }
 
-            pendingEvent = {
-              type: type,
-              detail: {
-                dx: dx,
-                dy: dy,
-                duration: $.now() - startTime
-              }
-            };
+          this._prevDx = dx;
+          this._prevDy = dy;
 
-            break;
-          case 'touchend':
-            pendingEvent = null;
-            clearInterval(timer);
-
-            sendMessage(type, {
+          this._pendingEvent = {
+            type: type,
+            detail: {
               dx: dx,
               dy: dy,
-              duration: $.now() - startTime,
-              swipe: swipe
-            });
+              duration: Date.now() - this._startTime
+            }
+          };
 
-            break;
-          case 'click':
-          case 'dblclick':
-            sendMessage(type, {});
-            break;
-        }
+          break;
+        case 'touchend':
+          this._pendingEvent = null;
+          clearInterval(this._reportTimer);
+          this._reportTimer = null;
+
+          this._handler(type, {
+            dx: dx,
+            dy: dy,
+            duration: Date.now() - this._startTime,
+            swipe: swipe
+          });
+
+          break;
+        case 'click':
+        case 'dblclick':
+          this._handler(type, {});
+          break;
       }
-
-      function updatePanelInfo() {
-        panelX = Math.round($touchPanel.offset().left);
-        panelY = Math.round($touchPanel.offset().top);
-        panelWidth = $touchPanel.width();
-        panelHeight = $touchPanel.height();
-      }
-
-      updatePanelInfo();
-      $(window).resize(updatePanelInfo);
-    });
+    }
   };
-}(jQuery));
+
+  exports.TouchPanel = TouchPanel;
+}(window));

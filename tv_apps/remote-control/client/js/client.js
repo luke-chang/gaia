@@ -1,4 +1,4 @@
-/* global jQuery */
+/* global jQuery, TouchPanel */
 'use strict';
 
 (function($) {
@@ -63,12 +63,14 @@
 
     /////////////////////////////////////
 
-    $('#touch-panel').touchPanel({
+    // jshint unused: false
+    var touchPanel = new TouchPanel($('#touch-panel').get(0), {
       touchingClass: 'touching',
       handler: sendMessage
     });
 
-    $('#scroll-panel').touchPanel({
+    // jshint unused: false
+    var scrollPanel = new TouchPanel($('#scroll-panel').get(0), {
       touchingClass: 'touching',
       dblClickTimeThreshold: 0,
       clickTimeThreshold: 0,
