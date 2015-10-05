@@ -2,20 +2,47 @@
 'use strict';
 
 (function($) {
+  var DEBUG = false;
+
   $.fn.touchPanel = function(options) {
+    if (options) {
+      if ($.isFunction(options)) {
+        options = {
+          handler: options
+        };
+      } else if (!$.isPlainObject(options)) {
+        console.log('touchPanel: Cancelled due to invalid parameters!');
+        return $(this);
+      }
+    }
+
     var settings = $.extend({
-      touchReportPeriod: 60,    // milliseconds
-      clickTimeThreshold: 100,  // milliseconds
-      clickMoveThreshold: 5     // pixels
+      touchReportPeriod: 60,      // milliseconds
+      dblClickTimeThreshold: 200, // milliseconds
+      clickTimeThreshold: 100,    // milliseconds
+      clickMoveThreshold: 5,      // pixels
+      handler: null               // function(type, detail) {}
     }, options);
+
+    if (!settings.handler) {
+      settings.handler = function() {};
+    }
 
     return $(this).each(function() {
       var waitForClickTimer, identifier, pendingEvent;
       var startX, startY, panelX, panelY, panelWidth, panelHeight;
       var prevDx, prevDy, hasMouseDown;
-      var timer;
+      var timer, pendingClickTimer;
 
       var $touchPanel = $(this);
+      var sendMessage = $.proxy(settings.handler, $touchPanel);
+
+      $(window).mouseup(function(evt) {
+        if (hasMouseDown && evt.button === 0) {
+          hasMouseDown = false;
+          onEnd(evt.clientX, evt.clientY);
+        }
+      });
 
       $touchPanel.mousedown(function(evt) {
         if (evt.button !== 0) {
@@ -31,7 +58,7 @@
         return onMove(evt.clientX, evt.clientY);
       })
       .mouseup(function(evt) {
-        if (evt.button !== 0) {
+        if (! hasMouseDown || evt.button !== 0) {
           return true;
         }
         hasMouseDown = false;
@@ -67,6 +94,8 @@
       });
 
       function onStart(x, y) {
+        $touchPanel.addClass('touching');
+
         startX = x;
         startY = y;
 
@@ -110,22 +139,34 @@
         if (waitForClickTimer) {
           clearTimeout(waitForClickTimer);
           waitForClickTimer = null;
-          handleTouch('click');
+
+          if (settings.dblClickTimeThreshold) {
+            if (pendingClickTimer) {
+              clearTimeout(pendingClickTimer);
+              pendingClickTimer = null;
+              handleTouch('dblclick');
+            } else {
+              pendingClickTimer = setTimeout(function() {
+                pendingClickTimer = null;
+                handleTouch('click');
+              }, settings.dblClickTimeThreshold);
+            }
+          } else {
+            handleTouch('click');
+          }
         } else {
           handleTouch('touchend', dx, dy);
         }
 
+        $touchPanel.removeClass('touching');
         return false;
       }
 
-      function sendMessage(type, detail) {
-        $touchPanel.trigger('touchPanel:action', {
-          type: type,
-          detail: detail
-        });
-      }
-
       function handleTouch(type, dx, dy) {
+        if (DEBUG) {
+          console.log('[touchPanel] handling ' + type);
+        }
+
         switch (type) {
           case 'touchstart':
             prevDx = undefined;
@@ -165,6 +206,7 @@
 
             break;
           case 'touchend':
+            pendingEvent = null;
             clearInterval(timer);
 
             sendMessage(type, {
@@ -174,6 +216,7 @@
 
             break;
           case 'click':
+          case 'dblclick':
             sendMessage(type, {});
             break;
         }

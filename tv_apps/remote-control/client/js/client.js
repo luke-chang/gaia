@@ -1,100 +1,115 @@
-/* global $ */
+/* global jQuery */
 'use strict';
 
-$(function() {
-  function AJAX(url) {
-    this.url = url;
-    this.onmessage = null;
-    this.readyState = 1;
-  }
+(function($) {
+  var AJAX_URL = 'client.sjs';
+  var DEBUG = true;
 
-  AJAX.prototype.send = function(message) {
-    var self = this;
-    $.ajax(self.url, {
-      method: 'get',
-      data: {
-        'message': message.toString()
-      },
-      dataType: 'text',
-      success: function(data) {
-        if (data && self.onmessage) {
-          self.onmessage({
-            data: data
-          });
-        }
-      },
-      error: function(jqXHR, textStatus, errorThrown) {
-        console.log('Ajax Error: ' + errorThrown);
-      }
-    });
-  };
-
-  //////////////////////////////////////
-
-  var protocols = {
-    socket: new WebSocket('ws://localhost:8080/', 'echo-protocol'),
-    ajax: new AJAX('ajax.sjs')
-  };
-
-  $.each(protocols, function(key, value) {
-    value.onmessage = function(evt) {
-      var data = evt.data;
-      console.log(key + ' echo: ' + data);
-    };
-  });
-
-  function sendMessage(type, detail) {
-    var protocol = protocols[$('input[name="protocol"]:checked').val()];
-    if(protocol.readyState != 1) {
-      console.log('ERROR: readyState=' + protocol.readyState);
-      return;
-    }
-
+  function sendMessage(type, detail, success, error) {
     var data = {
       type: type,
       detail: $.isPlainObject(detail) ? detail : detail.toString()
     };
 
-    console.log(data);
-    protocol.send(JSON.stringify(data));
+    if (DEBUG) {
+      console.log(JSON.stringify(data));
+    }
+
+    $.ajax(AJAX_URL, {
+      method: 'get',
+      data: {
+        message: data
+      },
+      dataType: 'text',
+      success: function(data) {
+        if (success) {
+          success(data);
+        }
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        console.error('Ajax Error: ' + errorThrown);
+        if (error) {
+          error(jqXHR, textStatus, errorThrown);
+        }
+      }
+    });
   }
 
-  //////////////////////////////////////
-
-  $('#btnEcho').click(function() {
-    sendMessage('echo', new Date());
-  });
-
-  $('#secKeyboard button').click(function() {
-    sendMessage('keypress', $(this).data('key'));
-  });
-
-  $('#secInput input').keydown(function(evt) {
-    if (evt.keyCode == 13) {
-      $('#sendString').triggerHandler('click');
+  $(document).ready(function() {
+    $('#input-string').keydown(function(evt) {
+      switch(evt.keyCode) {
+        case 13: //Enter
+          $('#send-string').triggerHandler('click');
+          break;
+        case 27: //Escape
+          $('#input-string').val('');
+          break;
+        default:
+          return true;
+      }
       return false;
-    }
-  });
-
-  $('#sendString').click(function() {
-    var string = $('#secInput input').val();
-    sendMessage('input', {
-      clear: true,
-      string: string
     });
-    $('#secInput input').focus().val('').val(string);
-  });
 
-  $('#clearString').click(function() {
-    sendMessage('input', {
-      clear: true
+    $('#send-string').click(function() {
+      var string = $('#input-string').val();
+      sendMessage('input', {
+        clear: true,
+        string: string
+      });
+      $('#input-string').focus().val('').val(string);
     });
-    $('#secInput input').focus().val('');
-  });
 
-  /////////////////////////////////////
+    /////////////////////////////////////
 
-  $('#touchPanel').touchPanel().on('touchPanel:action', function(evt, data) {
-    sendMessage(data.type, data.detail);
+    $('#touch-panel')
+      .touchPanel(sendMessage)
+      .swipe({
+        swipe: function(event, direction, distance, duration, fingerCount) {
+          var detail = {
+            direction: direction,
+            distance: distance,
+            duration: duration
+          };
+
+          if (fingerCount < 2) {
+            sendMessage('swipe', detail);
+          } else {
+            sendMessage('scroll', detail);
+          }
+        },
+        threshold: 25,
+        fingers: 2
+      });
+
+    $('#scroll-panel')
+      .touchPanel({
+        dblClickTimeThreshold: 0,
+        clickTimeThreshold: 0,
+        clickMoveThreshold: 0
+      })
+      .swipe({
+        swipe: function(event, direction, distance, duration) {
+          switch(direction) {
+            case 'up':
+            case 'down':
+              sendMessage('scroll', {
+                direction: direction,
+                distance: distance,
+                duration: duration
+              });
+              break;
+          }
+        },
+        threshold: 25,
+        fingers: 1
+      });
+
+    /////////////////////////////////////
+
+    $('#section-buttons .button').click(function() {
+      if ($(this).data('key')) {
+        sendMessage('keypress', $(this).data('key'));
+      }
+    });
   });
-});
+}(jQuery));
