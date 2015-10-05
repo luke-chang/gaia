@@ -1,50 +1,67 @@
-/* global jQuery, TouchPanel */
+/* global TouchPanel */
 'use strict';
 
-(function($) {
+(function(exports) {
   var AJAX_URL = 'client.sjs';
   var DEBUG = true;
 
   function sendMessage(type, detail, success, error) {
     var data = {
       type: type,
-      detail: $.isPlainObject(detail) ? detail : detail.toString()
+      detail: (typeof detail === 'object') ? detail : detail.toString()
     };
 
     if (DEBUG) {
-      console.log(JSON.stringify(data));
+      console.log('send: ' + JSON.stringify(data));
     }
 
-    $.ajax(AJAX_URL, {
-      method: 'get',
-      data: {
-        message: data
-      },
-      dataType: 'text',
-      success: function(data) {
-        if (success) {
-          success(data);
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', encodeURI(AJAX_URL + '?message=' + JSON.stringify(data)));
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          var data = xhr.responseText;
+          if (DEBUG) {
+            console.log('Ajax response: ' + data);
+          }
+          if (success) {
+            success(data);
+          }
+        } else {
+          if (DEBUG) {
+            console.error('Ajax error: ' + xhr.status);
+          }
+          if (error) {
+            error(xhr.status);
+          }
         }
-      },
-      error: function(jqXHR, textStatus, errorThrown) {
-        if (DEBUG) {
-          console.error('Ajax Error: ' + errorThrown);
-        }
-        if (error) {
-          error(jqXHR, textStatus, errorThrown);
-        }
+      };
+      xhr.send();
+    } catch(err) {
+      if (DEBUG) {
+        console.error('Ajax error: ' + err.name);
       }
-    });
+      if (error) {
+        error(err.name);
+      }
+    }
   }
 
-  $(document).ready(function() {
-    $('#input-string').keydown(function(evt) {
+  function init() {
+    var input = document.getElementById('input-string');
+    var btnSend = document.getElementById('send-string');
+
+    input.addEventListener('keydown', function(evt) {
       switch(evt.keyCode) {
         case 13: //Enter
-          $('#send-string').triggerHandler('click');
+          btnSend.click();
           break;
         case 27: //Escape
-          $('#input-string').val('');
+          input.value = '';
+
+          // Firefox workaround
+          input.blur();
+          input.focus();
           break;
         default:
           return true;
@@ -52,25 +69,24 @@
       return false;
     });
 
-    $('#send-string').click(function() {
-      var string = $('#input-string').val();
+    btnSend.addEventListener('click', function() {
       sendMessage('input', {
         clear: true,
-        string: string
+        string: input.value
       });
-      $('#input-string').focus().val('').val(string);
+      input.select();
     });
 
     /////////////////////////////////////
 
     // jshint unused: false
-    var touchPanel = new TouchPanel($('#touch-panel').get(0), {
+    var touchPanel = new TouchPanel(document.getElementById('touch-panel'), {
       touchingClass: 'touching',
       handler: sendMessage
     });
 
     // jshint unused: false
-    var scrollPanel = new TouchPanel($('#scroll-panel').get(0), {
+    var scrollPanel = new TouchPanel(document.getElementById('scroll-panel'), {
       touchingClass: 'touching',
       dblClickTimeThreshold: 0,
       clickTimeThreshold: 0,
@@ -82,10 +98,30 @@
 
     /////////////////////////////////////
 
-    $('#section-buttons .button').click(function() {
-      if ($(this).data('key')) {
-        sendMessage('keypress', $(this).data('key'));
+    var buttonOnClick = function() {
+      var key = this.dataset.key;
+      if (key) {
+        sendMessage('keypress', key);
       }
+    };
+
+    var buttons = document.querySelectorAll('#section-buttons .button');
+    [].slice.call(buttons).forEach(function(elem) {
+      elem.addEventListener('click', buttonOnClick);
     });
-  });
-}(jQuery));
+  }
+
+  (function(handler) {
+    var handled = false;
+    function wrapper() {
+      if (!handled) {
+        handled = true;
+        document.removeEventListener('DOMContentLoaded', wrapper);
+        document.removeEventListener('load', wrapper);
+        handler();
+      }
+    }
+    document.addEventListener('DOMContentLoaded', wrapper);
+    document.addEventListener('load', wrapper);
+  }(init));
+}(window));
