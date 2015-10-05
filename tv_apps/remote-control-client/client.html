@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>TV remote control</title>
+  <link rel="stylesheet" type="text/css" href="style/main.css">
+  <script src="js/touch_panel.js"></script>
+  <script src="js/client.js"></script>
+  <!-- Shared L10n libraries -->
+  <script src="js/l20n.js"></script>
+  <!-- L10n properties -->
+  <meta name="defaultLanguage" content="zh-TW">
+  <meta name="availableLanguages" content="en-US">
+  <link rel="localization" href="locales/remote-control-client.{locale}.properties">
+</head>
+<body>
+  <h1>TV remote control</h1>
+  <section id="section-input">
+    <input id="input-string" type="text" placeholder="type here and send">
+    <div id="send-string" class="button" data-l10n-id="send"></div>
+  </section>
+  <section id="section-touch-panel">
+    <div id="touch-panel" class="panel"></div>
+    <div id="scroll-panel" class="panel"></div>
+  </section>
+  <section id="section-buttons">
+    <div class="button" data-key="DOM_VK_ESCAPE">Back</div>
+    <div class="button" data-key="DOM_VK_HOME">Home</div>
+    <div class="button" data-key="DOM_VK_CONTEXT_MENU">Option</div>
+    <div class="button">Pin</div>
+  </section>
+</body>
+</html>
