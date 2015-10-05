@@ -74,7 +74,7 @@
       clickTimeThreshold: 0,
       clickMoveThreshold: 0,
       handler: function(type, detail) {
-        sendMessage('scroll', detail);
+        sendMessage(type.replace('touch', 'scroll'), detail);
       }
     });
 

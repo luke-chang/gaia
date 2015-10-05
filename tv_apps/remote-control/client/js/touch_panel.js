@@ -102,6 +102,7 @@
 
         startX = x;
         startY = y;
+        startTime = $.now();
 
         var handleTouchStart = function() {
           waitForClickTimer = null;
@@ -114,8 +115,6 @@
         } else {
           handleTouchStart();
         }
-
-        startTime = $.now();
 
         return false;
       }
@@ -161,16 +160,13 @@
             handleTouch('click');
           }
         } else {
-          var swipe;
+          var direction;
           var distance = Math.round(Math.sqrt(dx * dx + dy * dy));
           if (distance >= settings.swipeMoveThreshold) {
-            var duration = $.now() - startTime;
             var angle = Math.atan2(dy, dx) * 180 / Math.PI;
             if (angle < 0) {
               angle += 360;
             }
-
-            var direction;
             if (angle >= 315 || angle < 45) {
               direction = 'right';
             } else if (angle >= 45 && angle < 135) {
@@ -180,15 +176,9 @@
             } else if (angle >= 225 && angle < 315) {
               direction = 'up';
             }
-
-            swipe = {
-              direction: direction,
-              distance: distance,
-              duration: duration
-            };
           }
 
-          handleTouch('touchend', dx, dy, swipe);
+          handleTouch('touchend', dx, dy, direction);
         }
 
         if (settings.touchingClass) {
@@ -236,7 +226,8 @@
               type: type,
               detail: {
                 dx: dx,
-                dy: dy
+                dy: dy,
+                duration: $.now() - startTime
               }
             };
 
@@ -248,6 +239,7 @@
             sendMessage(type, {
               dx: dx,
               dy: dy,
+              duration: $.now() - startTime,
               swipe: swipe
             });
 
