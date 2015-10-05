@@ -11,16 +11,18 @@
           handler: options
         };
       } else if (!$.isPlainObject(options)) {
-        console.log('touchPanel: Cancelled due to invalid parameters!');
+        console.log('touchPanel: Invalid parameters!');
         return $(this);
       }
     }
 
     var settings = $.extend({
       touchReportPeriod: 60,      // milliseconds
-      dblClickTimeThreshold: 200, // milliseconds
+      dblClickTimeThreshold: 250, // milliseconds
       clickTimeThreshold: 100,    // milliseconds
       clickMoveThreshold: 5,      // pixels
+      swipeMoveThreshold: 25,     // pixels
+      touchingClass: null,        // class name
       handler: null               // function(type, detail) {}
     }, options);
 
@@ -32,7 +34,7 @@
       var waitForClickTimer, identifier, pendingEvent;
       var startX, startY, panelX, panelY, panelWidth, panelHeight;
       var prevDx, prevDy, hasMouseDown;
-      var timer, pendingClickTimer;
+      var timer, pendingClickTimer, startTime;
 
       var $touchPanel = $(this);
       var sendMessage = $.proxy(settings.handler, $touchPanel);
@@ -94,7 +96,9 @@
       });
 
       function onStart(x, y) {
-        $touchPanel.addClass('touching');
+        if (settings.touchingClass) {
+          $touchPanel.addClass(settings.touchingClass);
+        }
 
         startX = x;
         startY = y;
@@ -110,6 +114,8 @@
         } else {
           handleTouchStart();
         }
+
+        startTime = $.now();
 
         return false;
       }
@@ -155,14 +161,44 @@
             handleTouch('click');
           }
         } else {
-          handleTouch('touchend', dx, dy);
+          var swipe;
+          var distance = Math.round(Math.sqrt(dx * dx + dy * dy));
+          if (distance >= settings.swipeMoveThreshold) {
+            var duration = $.now() - startTime;
+            var angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            if (angle < 0) {
+              angle += 360;
+            }
+
+            var direction;
+            if (angle >= 315 || angle < 45) {
+              direction = 'right';
+            } else if (angle >= 45 && angle < 135) {
+              direction = 'down';
+            } else if (angle >= 135 && angle < 225) {
+              direction = 'left';
+            } else if (angle >= 225 && angle < 315) {
+              direction = 'up';
+            }
+
+            swipe = {
+              direction: direction,
+              distance: distance,
+              duration: duration
+            };
+          }
+
+          handleTouch('touchend', dx, dy, swipe);
         }
 
-        $touchPanel.removeClass('touching');
+        if (settings.touchingClass) {
+          $touchPanel.removeClass(settings.touchingClass);
+        }
+
         return false;
       }
 
-      function handleTouch(type, dx, dy) {
+      function handleTouch(type, dx, dy, swipe) {
         if (DEBUG) {
           console.log('[touchPanel] handling ' + type);
         }
@@ -211,7 +247,8 @@
 
             sendMessage(type, {
               dx: dx,
-              dy: dy
+              dy: dy,
+              swipe: swipe
             });
 
             break;

@@ -27,7 +27,9 @@
         }
       },
       error: function(jqXHR, textStatus, errorThrown) {
-        console.error('Ajax Error: ' + errorThrown);
+        if (DEBUG) {
+          console.error('Ajax Error: ' + errorThrown);
+        }
         if (error) {
           error(jqXHR, textStatus, errorThrown);
         }
@@ -61,48 +63,20 @@
 
     /////////////////////////////////////
 
-    $('#touch-panel')
-      .touchPanel(sendMessage)
-      .swipe({
-        swipe: function(event, direction, distance, duration, fingerCount) {
-          var detail = {
-            direction: direction,
-            distance: distance,
-            duration: duration
-          };
+    $('#touch-panel').touchPanel({
+      touchingClass: 'touching',
+      handler: sendMessage
+    });
 
-          if (fingerCount < 2) {
-            sendMessage('swipe', detail);
-          } else {
-            sendMessage('scroll', detail);
-          }
-        },
-        threshold: 25,
-        fingers: 2
-      });
-
-    $('#scroll-panel')
-      .touchPanel({
-        dblClickTimeThreshold: 0,
-        clickTimeThreshold: 0,
-        clickMoveThreshold: 0
-      })
-      .swipe({
-        swipe: function(event, direction, distance, duration) {
-          switch(direction) {
-            case 'up':
-            case 'down':
-              sendMessage('scroll', {
-                direction: direction,
-                distance: distance,
-                duration: duration
-              });
-              break;
-          }
-        },
-        threshold: 25,
-        fingers: 1
-      });
+    $('#scroll-panel').touchPanel({
+      touchingClass: 'touching',
+      dblClickTimeThreshold: 0,
+      clickTimeThreshold: 0,
+      clickMoveThreshold: 0,
+      handler: function(type, detail) {
+        sendMessage('scroll', detail);
+      }
+    });
 
     /////////////////////////////////////
 
