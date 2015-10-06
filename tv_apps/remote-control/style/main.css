@@ -82,6 +82,10 @@ h1 {
   justify-content: center;
 }
 
+#big-qrcode.visible {
+  display: flex;
+}
+
 #big-qrcode-container {
   padding: 1.8rem;
   background-color: white;

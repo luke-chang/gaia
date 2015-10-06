@@ -1,47 +1,97 @@
-/* global QRCode, KeyNavigationAdapter, SpatialNavigator */
+/* global QRCode, KeyNavigationAdapter, Section */
 'use strict';
 
 (function(exports) {
+  var MAIN_SECTION = 'main-section';
+  var DEFAULT_ELEMENT = 'qrcode';
+
   function App() {
-    this.spatialNav = null;
+    this.sections = [];
     this.keyNav = null;
     this.ip = '';
   }
 
   App.prototype = {
+    start: function() {
+      this._updateIP('127.0.0.1');
+
+      var sections = document.getElementsByTagName('section');
+      Array.from(sections).forEach((dom) => {
+        var id = dom.id;
+        var section = new Section(id);
+        if (id == MAIN_SECTION) {
+          this.activeSection = section.show();
+        } else {
+          section.hide();
+        }
+        section.on('click', this._handleClick.bind(this));
+        this.sections[id] = section;
+      });
+
+      this.activeSection.focus(document.getElementById(DEFAULT_ELEMENT));
+
+      this.keyNav = new KeyNavigationAdapter();
+      this.keyNav.init();
+      this.keyNav.on('move', (direction) => {
+        this.activeSection.move(direction);
+      });
+      this.keyNav.on('enter', () => {
+        this.activeSection.enter();
+      });
+      this.keyNav.on('esc', () => {
+        if (!this.activeSection.back()) {
+          this._handleBack();
+        }
+      });
+    },
+
+    stop: function() {
+      this.keyNav.uninit();
+      this.keyNav = null;
+      this.activeSection = '';
+      this.sections = [];
+    },
+
     _updateIP: function(ip) {
       this.ip = ip;
       document.getElementById('ip').textContent = this.ip;
       this._updateQRCode('qrcode-image');
+      this._updateQRCode('big-qrcode-image', 700, 700);
     },
 
-    _updateQRCode: function(elemId) {
-      var div = document.getElementById(elemId);
-      while (div.firstChild) {
-        div.removeChild(div.firstChild);
+    _updateQRCode: function(elemId, width, height) {
+      var div, rect;
+
+      this._removeQRCode(elemId);
+
+      if (!width || !height) {
+        div = document.getElementById(elemId);
+        rect = div.getBoundingClientRect();
       }
 
-      var rect = div.getBoundingClientRect();
       /* jshint unused: false */
       var qrcode = new QRCode(elemId, {
         text: 'http://' + this.ip + '/',
-        width: rect.width,
-        height: rect.height,
+        width: width || rect.width,
+        height: height || rect.height,
         colorDark : '#000000',
         colorLight : '#ffffff',
         correctLevel : QRCode.CorrectLevel.L
       });
     },
 
-    _handleClick: function() {
-      var focused = this.spatialNav.getFocusedElement();
-      if (!focused) {
-        return;
+    _removeQRCode: function(elemId) {
+      var div = document.getElementById(elemId);
+      while (div.firstChild) {
+        div.removeChild(div.firstChild);
       }
+    },
 
-      switch(focused.id) {
+    _handleClick: function(elem_id, section_id) {
+      switch(elem_id) {
         case 'qrcode':
-          this._enlargeQRCode(true);
+          this.activeSection.hide();
+          this.activeSection = this.sections['big-qrcode'].show();
           break;
         case 'config':
           break;
@@ -49,76 +99,10 @@
     },
 
     _handleBack: function() {
-      this._enlargeQRCode(false);
-    },
-
-    _initSpatialNavigation: function() {
-      this.spatialNav = new SpatialNavigator(
-        document.querySelectorAll('.focusable'),
-        {
-          ignoreHiddenElement: true,
-          rememberSource: true
-        }
-      );
-      this.spatialNav.on('focus', function(elem) {
-        elem.focus();
-      });
-      this.spatialNav.focus(document.getElementById('qrcode'));
-
-      this.keyNav = new KeyNavigationAdapter();
-      this.keyNav.init();
-      this.keyNav.on('move', this.spatialNav.move.bind(this.spatialNav));
-      this.keyNav.on('enter', this._handleClick.bind(this));
-      this.keyNav.on('esc', this._handleBack.bind(this));
-    },
-
-    _enableMainSection: function(enable) {
-      var focusable = document.querySelectorAll('#main-section .focusable');
-      Array.from(focusable).forEach(function(elem) {
-        if (enable) {
-          elem.removeAttribute('aria-hidden');
-        } else {
-          elem.setAttribute('aria-hidden', true);
-        }
-      });
-
-      if (enable) {
-        this.spatialNav.focus();
-      } else {
-        document.activeElement.blur();
-      }
-    },
-
-    _enlargeQRCode: function(enable) {
-      var bigQRCode = document.getElementById('big-qrcode');
-      bigQRCode.style.display = enable ? 'flex' : 'none';
-      this._enableMainSection(!enable);
-      if (enable) {
-        this._updateQRCode('big-qrcode-image');
-      } else {
-        var div = document.getElementById('big-qrcode-image');
-        while (div.firstChild) {
-          div.removeChild(div.firstChild);
-        }
-      }
-    },
-
-    start: function() {
-      this._updateIP('127.0.0.1');
-      this._initSpatialNavigation();
-    },
-
-    stop: function() {
-      this.keyNav.uninit();
-      this.keyNav = null;
-      this.spatialNav = null;
+      this.activeSection.hide();
+      this.activeSection = this.sections[MAIN_SECTION].show();
     }
   };
 
   exports.App = App;
-
-  window.onload = function() {
-    var app = new App();
-    app.start();
-  };
 }(window));
