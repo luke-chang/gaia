@@ -93,7 +93,9 @@
           this.activeSection.hide();
           this.activeSection = this.sections['big-qrcode'].show();
           break;
-        case 'config':
+        case 'config-icon':
+          this.activeSection.hide();
+          this.activeSection = this.sections['config-section'].show();
           break;
       }
     },

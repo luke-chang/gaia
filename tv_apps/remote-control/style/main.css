@@ -19,13 +19,29 @@ html, body {
   margin: 4rem 6rem;
 }
 
+#config-section {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: #ccc;
+  box-sizing: border-box;
+  padding: 4rem 6rem;
+  display: none;
+}
+
+#config-section.visible {
+  display: block;
+}
+
 h1 {
   margin: 0 0 1rem 0;
   font-size: 4rem;
   font-style: italic;
 }
 
-#config {
+#config-icon {
   position: absolute;
   right: 0;
   top: 0;

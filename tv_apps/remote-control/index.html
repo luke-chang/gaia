@@ -7,13 +7,12 @@
     <link rel="stylesheet" type="text/css" href="style/main.css">
     <script defer src="vendor/qrcodejs/qrcode.min.js"></script>
     <script defer src="vendor/evt/index.js"></script>
-    <script defer src="../../shared/js/smart-screen/key_navigation_adapter.js"></script>
-    <script defer src="../../shared/js/smart-screen/spatial_navigator.js"></script>
+    <script defer src="shared/js/l10n.js"></script>
+    <script defer src="shared/js/smart-screen/key_navigation_adapter.js"></script>
+    <script defer src="shared/js/smart-screen/spatial_navigator.js"></script>
     <script defer src="js/section.js"></script>
     <script defer src="js/app.js"></script>
     <script defer src="js/bootstrap.js"></script>
-    <!-- Shared L10n libraries -->
-    <script src="shared/js/l10n.js"></script>
     <!-- L10n properties -->
     <meta name="defaultLanguage" content="en-US">
     <meta name="availableLanguages" content="en-US">
@@ -21,11 +20,11 @@
   </head>
   <body>
     <section id="main-section">
-      <h1>TV Remote Control</h1>
-      <div id="config" class="focusable" tabindex="-1"></div>
+      <h1 data-l10n-id="title"></h1>
+      <div id="config-icon" class="focusable" tabindex="-1"></div>
       <div id="instruction">
-        <p>Open your browser and connect to the below link.</p>
-        <p>Make sure your device is using the some WiFi with TV.</p>
+        <p data-l10n-id="instruction1"></p>
+        <p data-l10n-id="instruction2"></p>
       </div>
       <div id="location">
         <div id="ip"></div>
@@ -38,6 +37,9 @@
       <div id="big-qrcode-container">
         <div id="big-qrcode-image"></div>
       </div>
+    </section>
+    <section id="config-section">
+      test
     </section>
   </body>
 </html>
