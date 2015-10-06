@@ -1,18 +1,95 @@
+html {
+  font-size: 10px;
+  /* We have Fira Sans as default font in real device. But it isn't default in
+   * browser. That's the main reason this line is here.*/
+  font-family: "Fira Sans";
+}
+
 html, body {
-  font-size: 12px;
-  padding: 0;
-  margin: 0;
+  width: 100%;
   height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  background-color: #ccc;
 }
 
-input {
-  width: 90%;
-  font-size: 150%;
-  padding: 0.5em;
-  margin: 1em;
+#main-section {
+  position: relative;
+  margin: 4rem 6rem;
 }
 
-#log {
-  font-size: 120%;
-  margin: 1em;
+h1 {
+  margin: 0 0 1rem 0;
+  font-size: 4rem;
+  font-style: italic;
+}
+
+#config {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 5rem;
+  height: 5rem;
+  background-color: gray;
+  border-radius: 50%;
+}
+
+#instruction p {
+  font-size: 2rem;
+  margin: 0.6rem 0;
+}
+
+#location {
+  margin-top: 15rem;
+  text-align: center;
+}
+
+#location > div {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#ip {
+  font-size: 10rem;
+  margin-right: 20rem;
+}
+
+#qrcode {
+  background-color: white;
+  padding: 1.2rem;
+}
+
+#qrcode-image {
+  width: 256px;
+  height: 256px;
+}
+
+.focusable:focus {
+  outline: 0.8rem solid yellow;
+}
+
+#big-qrcode {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: none;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
+#big-qrcode-container {
+  padding: 1.8rem;
+  background-color: white;
+  display: inline-block;
+}
+
+#big-qrcode-image {
+  width: 700px;
+  height: 700px;
+  background-color: white;
 }

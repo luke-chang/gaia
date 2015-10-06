@@ -5,10 +5,31 @@
     <meta charset="utf-8">
     <title>Remote Control</title>
     <link rel="stylesheet" type="text/css" href="style/main.css">
-    <script src="js/main.js"></script>
+    <script defer src="vendor/qrcodejs/qrcode.min.js"></script>
+    <script defer src="vendor/evt/index.js"></script>
+    <script defer src="../../shared/js/smart-screen/key_navigation_adapter.js"></script>
+    <script defer src="../../shared/js/smart-screen/spatial_navigator.js"></script>
+    <script defer src="js/app.js"></script>
   </head>
   <body>
-    <div><input type="text"></div>
-    <div id="log"></div>
+    <section id="main-section">
+      <h1>TV Remote Control</h1>
+      <div id="config" class="focusable" tabindex="-1"></div>
+      <div id="instruction">
+        <p>Open your browser and connect to the below link.</p>
+        <p>Make sure your device is using the some WiFi with TV.</p>
+      </div>
+      <div id="location">
+        <div id="ip"></div>
+        <div id="qrcode" class="focusable" tabindex="-1">
+          <div id="qrcode-image"></div>
+        </div>
+      </div>
+    </section>
+    <section id="big-qrcode">
+      <div id="big-qrcode-container">
+        <div id="big-qrcode-image"></div>
+      </div>
+    </section>
   </body>
 </html>

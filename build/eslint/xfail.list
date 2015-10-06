@@ -340,3 +340,4 @@ tv_apps/remote-control/client/vendor/jquery/jquery.min.js # line 4, col 18244, E
 tv_apps/remote-control/client/vendor/jquery/jquery.min.js # line 4, col 18656, Error - Unsafe assignment to innerHTML (no-unsafe-innerhtml/no-unsafe-innerhtml)
 tv_apps/remote-control/client/vendor/jquery/jquery.min.js # line 4, col 19302, Error - Unsafe assignment to innerHTML (no-unsafe-innerhtml/no-unsafe-innerhtml)
 tv_apps/remote-control/client/vendor/jquery/jquery.min.js # line 4, col 22105, Error - Unsafe assignment to innerHTML (no-unsafe-innerhtml/no-unsafe-innerhtml)
+tv_apps/remote-control/vendor/qrcodejs/qrcode.min.js # line 1, col 18851, Error - Unsafe assignment to innerHTML (no-unsafe-innerhtml/no-unsafe-innerhtml)
