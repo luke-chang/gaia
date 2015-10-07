@@ -78,12 +78,22 @@
     straightOverlapThreshold: 0.5,
 
     /**
-     * Ignore elements with style "display: none" or "visibility: hidden".
+     * Ignore elements with "display: none", "visibility: hidden" or
+     * "aria-hidden=true".
      * @type {Boolean}
      * @default false
      * @memberof SpatialNavigator.prototype
      */
     ignoreHiddenElement: false,
+
+    /**
+     * Ignore elements which contain this CSS class name. It only works when
+     * "ignoreHiddenElement" is ture.
+     * @type {String}
+     * @default ''
+     * @memberof SpatialNavigator.prototype
+     */
+    customHiddenClass: '',
 
     /**
      * The previous focused element has high priority to be chosen as the next
@@ -125,7 +135,10 @@
       if (this.ignoreHiddenElement && elem instanceof HTMLElement) {
         var computedStyle = window.getComputedStyle(elem);
         if (computedStyle.getPropertyValue('visibility') == 'hidden' ||
-            computedStyle.getPropertyValue('display') == 'none') {
+            computedStyle.getPropertyValue('display') == 'none' ||
+            elem.getAttribute('aria-hidden') == 'true' ||
+            ( this.customHiddenClass &&
+              elem.classList.contains(this.customHiddenClass) )) {
           return null;
         }
       }
