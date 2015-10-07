@@ -1,19 +1,24 @@
-/* global QRCode, KeyNavigationAdapter, Section */
+/* global QRCode, KeyNavigationAdapter, SettingsListener, Section, Config */
 'use strict';
 
 (function(exports) {
   var MAIN_SECTION = 'main-section';
   var DEFAULT_ELEMENT = 'qrcode';
+  var SETTINGS_SERVER_IP = 'remote-control.server-ip';
+
+  var _ = navigator.mozL10n.get;
 
   function App() {
+    this.config = null;
     this.sections = [];
     this.keyNav = null;
     this.ip = '';
+    this.observer = null;
   }
 
   App.prototype = {
     start: function() {
-      this._updateIP('127.0.0.1');
+      this.config = new Config();
 
       var sections = document.getElementsByTagName('section');
       Array.from(sections).forEach((dom) => {
@@ -38,18 +43,36 @@
       this.keyNav.on('enter', () => {
         this.activeSection.enter();
       });
-      this.keyNav.on('esc', () => {
-        if (!this.activeSection.back()) {
-          this._handleBack();
+      this.keyNav.on('esc', this._handleBack.bind(this));
+
+      this.observer = (ip) => {
+        if (ip) {
+          this._updateIP(ip);
+        } else {
+          this._updateIP('127.0.0.1');
         }
-      });
+      };
+      SettingsListener.observe(SETTINGS_SERVER_IP, '', this.observer);
     },
 
     stop: function() {
+      SettingsListener.unobserve(SETTINGS_SERVER_IP, this.observer);
+      this.observer = null;
+
       this.keyNav.uninit();
       this.keyNav = null;
       this.activeSection = '';
       this.sections = [];
+
+      this.config = null;
+    },
+
+    _switchSection: function(section_id) {
+      if (!section_id) {
+        section_id = MAIN_SECTION;
+      }
+      this.activeSection.hide();
+      this.activeSection = this.sections[section_id].show();
     },
 
     _updateIP: function(ip) {
@@ -69,8 +92,8 @@
         rect = div.getBoundingClientRect();
       }
 
-      /* jshint unused: false */
-      var qrcode = new QRCode(elemId, {
+      /* jshint nonew: false */
+      new QRCode(elemId, {
         text: 'http://' + this.ip + '/',
         width: width || rect.width,
         height: height || rect.height,
@@ -87,22 +110,36 @@
       }
     },
 
-    _handleClick: function(elem_id, section_id) {
-      switch(elem_id) {
+    _handleClick: function(elem, section_id) {
+      switch(elem.id) {
         case 'qrcode':
-          this.activeSection.hide();
-          this.activeSection = this.sections['big-qrcode'].show();
+          this._switchSection('big-qrcode');
           break;
         case 'config-icon':
-          this.activeSection.hide();
-          this.activeSection = this.sections['config-section'].show();
+          this.config.prepareOptions((checked) => {
+            this._switchSection('config-section');
+            this.activeSection.focus(document.getElementById(checked));
+          });
+          break;
+        case 'option-pair-off':
+        case 'option-pair-on':
+        case 'option-disabled':
+          this.config.check(elem.id);
+          break;
+        case 'clear-paired-devices':
+          if (confirm(_('clear-paired-devices-message'))) {
+            this.config.clearAuthorizedDevices();
+          }
+          break;
+        case 'save-config':
+          this.config.save();
+          this._switchSection();
           break;
       }
     },
 
     _handleBack: function() {
-      this.activeSection.hide();
-      this.activeSection = this.sections[MAIN_SECTION].show();
+      this._switchSection();
     }
   };
 

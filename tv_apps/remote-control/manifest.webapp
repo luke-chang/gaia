@@ -20,5 +20,6 @@
   },
   "orientation": "landscape",
   "permissions": {
+    "settings": { "access": "readwrite" }
   }
 }

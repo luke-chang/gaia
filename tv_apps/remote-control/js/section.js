@@ -7,9 +7,15 @@
     this._dom = document.getElementById(this.id);
     this._active = false;
 
+    var focusables = this._dom.querySelectorAll('.focusable');
+    Array.from(focusables).forEach(function(elem) {
+      elem.setAttribute('tabindex', -1);
+    });
+
     this._spatialNav = new SpatialNavigator(
-      this._dom.querySelectorAll('.focusable'),
+      focusables,
       {
+        customHiddenClass: 'skip-spatial-navigation',
         ignoreHiddenElement: true,
         rememberSource: true
       }
@@ -34,15 +40,7 @@
     enter: function() {
       var focused = this._spatialNav.getFocusedElement();
       if (focused) {
-        return this.fire('click', focused.id, this.id);
-      }
-      return false;
-    },
-
-    back: function() {
-      var focused = this._spatialNav.getFocusedElement();
-      if (focused) {
-        return this.fire('back', focused.id);
+        return this.fire('click', focused, this.id);
       }
       return false;
     },

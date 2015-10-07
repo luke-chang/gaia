@@ -113,3 +113,55 @@ h1 {
   height: 700px;
   background-color: white;
 }
+
+#option-list {
+  font-size: 3rem;
+  margin: 12rem 0 0 35rem;
+}
+
+.option-item {
+  margin-bottom: 8rem;
+}
+
+.option-radio, .option-content {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.option-radio {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.option-radio.checked {
+  background-color: red;
+  border: 0.5rem solid white;
+}
+
+.option-content {
+  margin-left: 2rem;
+}
+
+.option-content .description {
+  margin-top: 1.5rem;
+  font-size: 2.2rem;
+}
+
+#clear-paired-devices {
+  margin-top: 2rem;
+  padding: 1rem 2rem;
+  font-size: 2.2rem;
+}
+
+#save-config {
+  position: absolute;
+  right: 6rem;
+  bottom: 4rem;
+  font-size: 3rem;
+  background-color: gray;
+  color: white;
+  padding: 1.5rem 10rem;
+}
