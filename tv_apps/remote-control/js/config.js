@@ -26,7 +26,7 @@
         });
 
         var checked;
-        if (options['enabled']) {
+        if (options.enabled) {
           if (options['pairing-required']) {
             checked = 'option-pair-on';
           } else {
@@ -67,15 +67,19 @@
       var checked = document.querySelector('.option-radio.checked').id;
       switch(checked) {
         case 'option-pair-on':
-          settings['enabled'] = true;
-          settings['pairing-required'] = true;
+          settings = {
+            'enabled': true,
+            'pairing-required': true
+          };
           break;
         case 'option-pair-off':
-          settings['enabled'] = true;
-          settings['pairing-required'] = false;
+          settings = {
+            'enabled': true,
+            'pairing-required': false
+          };
           break;
         case 'option-disabled':
-          settings['enabled'] = false;
+          settings.enabled = false;
           break;
       }
       SettingsListener.getSettingsLock().set(settings);
