@@ -7,10 +7,9 @@
   <link rel="stylesheet" type="text/css" href="style/main.css">
   <script src="js/touch_panel.js"></script>
   <script src="js/client.js"></script>
-  <!-- Shared L10n libraries -->
   <script src="js/l20n.js"></script>
   <!-- L10n properties -->
-  <meta name="defaultLanguage" content="zh-TW">
+  <meta name="defaultLanguage" content="en-US">
   <meta name="availableLanguages" content="en-US">
   <link rel="localization" href="locales/remote-control-client.{locale}.properties">
 </head>
@@ -25,10 +24,10 @@
     <div id="scroll-panel" class="panel"></div>
   </section>
   <section id="section-buttons">
-    <div class="button" data-key="DOM_VK_ESCAPE">Back</div>
-    <div class="button" data-key="DOM_VK_HOME">Home</div>
-    <div class="button" data-key="DOM_VK_CONTEXT_MENU">Option</div>
-    <div class="button">Pin</div>
+    <div class="button" data-key="DOM_VK_ESCAPE" data-l10n-id="back"></div>
+    <div class="button" data-key="DOM_VK_HOME" data-l10n-id="home"></div>
+    <div class="button" data-key="DOM_VK_CONTEXT_MENU" data-l10n-id="option"></div>
+    <div class="button" id="pin-to-home" data-l10n-id="pin"></div>
   </section>
 </body>
 </html>

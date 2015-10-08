@@ -10,16 +10,13 @@
   },
   "locales": {
     "en-US": {
-      "name": "Remote Control",
-      "description": "Remote Control"
+      "name": "Remote Control Client Page",
+      "description": "Remote Control Client Page"
     }
   },
   "default_locale": "en-US",
   "icons": {
-    "336": "/style/icons/dashboard_336.png",
-    "672": "/style/icons/dashboard_672.png"
+    "128": "/style/icons/blank.png"
   },
-  "orientation": "landscape",
-  "permissions": {
-  }
+  "orientation": "landscape"
 }

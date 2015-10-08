@@ -3,7 +3,7 @@
 
 (function(exports) {
   var AJAX_URL = 'client.sjs';
-  var DEBUG = true;
+  var DEBUG = false;
 
   function sendMessage(type, detail, success, error) {
     var data = {
@@ -59,7 +59,7 @@
         case 27: //Escape
           input.value = '';
 
-          // Firefox workaround
+          // Workaround Firefox's bug
           input.blur();
           input.focus();
           break;
@@ -77,16 +77,14 @@
       input.select();
     });
 
-    /////////////////////////////////////
-
-    // jshint unused: false
-    var touchPanel = new TouchPanel(document.getElementById('touch-panel'), {
+    /* jshint nonew: false */
+    new TouchPanel(document.getElementById('touch-panel'), {
       touchingClass: 'touching',
       handler: sendMessage
     });
 
-    // jshint unused: false
-    var scrollPanel = new TouchPanel(document.getElementById('scroll-panel'), {
+    /* jshint nonew: false */
+    new TouchPanel(document.getElementById('scroll-panel'), {
       touchingClass: 'touching',
       dblClickTimeThreshold: 0,
       clickTimeThreshold: 0,
@@ -96,12 +94,14 @@
       }
     });
 
-    /////////////////////////////////////
-
     var buttonOnClick = function() {
       var key = this.dataset.key;
       if (key) {
         sendMessage('keypress', key);
+      } else if (this.id == 'pin-to-home') {
+        sendMessage('custom', {
+          action: 'pin-to-home'
+        });
       }
     };
 
