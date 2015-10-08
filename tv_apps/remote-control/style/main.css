@@ -57,13 +57,24 @@ h1 {
 }
 
 #location {
-  margin-top: 15rem;
+  margin-top: 20rem;
   text-align: center;
+  display: none;
 }
 
 #location > div {
   display: inline-block;
   vertical-align: middle;
+}
+
+.error-message {
+  margin-top: 30rem;
+  font-size: 3rem;
+  display: none;
+}
+
+#location.visible, .error-message.visible {
+  display: block;
 }
 
 #ip {

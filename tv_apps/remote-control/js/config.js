@@ -1,54 +1,69 @@
-/* global SettingsListener */
+/* global SettingsListener, evt */
 'use strict';
 
 (function(exports) {
+  var PREFIX = 'remote-control.';
   var SETTINGS = {
     'enabled': false,
     'pairing-required': false,
-    'authorized-devices': null
+    'authorized-devices': null,
+    'server-ip': ''
   };
 
+  var DEBUG = false;
+
   function Config() {
+    this._ready = false;
+    this._observer = [];
+    this.settings = [];
   }
 
-  Config.prototype = {
-    prepareOptions: function(callback) {
-      this._options = [];
-
-      var promises = [];
-      for(var key in SETTINGS) {
-        promises.push(this._getSetting(key, SETTINGS[key]));
+  Config.prototype = evt({
+    start: function() {
+      for(var name in SETTINGS) {
+        this._observer[name] = this._settingHandler.bind(this, name);
+        SettingsListener.observe(PREFIX + name, SETTINGS[name],
+          this._observer[name]);
       }
-      Promise.all(promises).then((values) => {
-        var options = {};
-        Object.keys(SETTINGS).forEach((name, index) => {
-          options[name] = values[index];
-        });
+    },
 
-        var checked;
-        if (options.enabled) {
-          if (options['pairing-required']) {
-            checked = 'option-pair-on';
-          } else {
-            checked = 'option-pair-off';
-          }
+    stop: function() {
+      for(var name in SETTINGS) {
+        SettingsListener.unobserve(PREFIX + name, this._observer[name]);
+      }
+      this.settings = [];
+      this._observer = [];
+      this._ready = false;
+    },
+
+    prepareOptions: function(callback) {
+      var checked;
+      if (this.settings.enabled) {
+        if (this.settings['pairing-required']) {
+          checked = 'option-pair-on';
         } else {
-          checked = 'option-disabled';
+          checked = 'option-pair-off';
         }
+      } else {
+        checked = 'option-disabled';
+      }
 
-        this.check(checked);
+      this.check(checked);
 
-        var authorizedDevices = [];
-        if (options['authorized-devices']) {
-          authorizedDevices = JSON.parse(options['authorized-devices']);
-        }
-        var length = authorizedDevices.length;
-        var button = document.getElementById('clear-paired-devices');
-        button.disabled = !length;
-        button.classList[length ? 'remove' : 'add']('skip-spatial-navigation');
+      var authorizedDevices = [];
+      if (this.settings['authorized-devices']) {
+        authorizedDevices = JSON.parse(this.settings['authorized-devices']);
+      }
+      var canClear = authorizedDevices.length;
+      var button = document.getElementById('clear-paired-devices');
+      button.disabled = !canClear;
+      if (canClear) {
+        button.removeAttribute('aria-hidden');
+      } else {
+        button.setAttribute('aria-hidden', true);
+      }
 
-        callback(checked);
-      });
+      callback(checked);
     },
 
     check: function(id) {
@@ -62,54 +77,63 @@
       });
     },
 
-    save: function() {
+    save: function(callback) {
       var settings = {};
       var checked = document.querySelector('.option-radio.checked').id;
       switch(checked) {
         case 'option-pair-on':
-          settings = {
-            'enabled': true,
-            'pairing-required': true
-          };
+          settings[PREFIX + 'enabled'] = true;
+          settings[PREFIX + 'pairing-required'] = true;
           break;
         case 'option-pair-off':
-          settings = {
-            'enabled': true,
-            'pairing-required': false
-          };
+          settings[PREFIX + 'enabled'] = true;
+          settings[PREFIX + 'pairing-required'] = false;
           break;
         case 'option-disabled':
-          settings.enabled = false;
+          settings[PREFIX + 'enabled'] = false;
           break;
       }
       SettingsListener.getSettingsLock().set(settings);
     },
 
     clearAuthorizedDevices: function() {
-      var req = SettingsListener.getSettingsLock().set({
-        'authorized-devices': null
-      });
+      var settings = {};
+      settings[PREFIX + 'authorized-devices'] = null;
+      var req = SettingsListener.getSettingsLock().set(settings);
       req.onsuccess = function() {
         var button = document.getElementById('clear-paired-devices');
-        document.getElementById('clear-paired-devices').disabled = true;
-        button.classList[length ? 'remove' : 'add']('skip-spatial-navigation');
+        button.disabled = true;
+        button.setAttribute('aria-hidden', true);
       };
     },
 
-    _getSetting: function(name, defaultValue) {
-      return new Promise((resolve, reject) => {
-        var req = SettingsListener.getSettingsLock().get(name);
-        req.onsuccess = () => {
-          var value = (req.result[name] === undefined) ?
-            defaultValue : req.result[name];
-          resolve(value);
-        };
-        req.onerror = () => {
-          reject();
-        };
-      });
+    _settingHandler: function(name, value) {
+      if (DEBUG) {
+        console.log('[Config] settings changed: ' + name + '=' + value);
+      }
+
+      this.settings[name] = value;
+      this.fire('changed', name, value);
+
+      if (!this._ready) {
+        var ready = true;
+        for(var key in SETTINGS) {
+          if (this.settings[key] === undefined) {
+            ready = false;
+            break;
+          }
+        }
+        if (ready) {
+          if (DEBUG) {
+            console.log('[Config] ready');
+          }
+
+          this.fire('ready');
+          this._ready = true;
+        }
+      }
     }
-  };
+  });
 
   exports.Config = Config;
 }(window));

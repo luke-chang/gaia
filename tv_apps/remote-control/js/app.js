@@ -1,10 +1,9 @@
-/* global QRCode, KeyNavigationAdapter, SettingsListener, Section, Config */
+/* global QRCode, KeyNavigationAdapter, Section, Config */
 'use strict';
 
 (function(exports) {
   var MAIN_SECTION = 'main-section';
   var DEFAULT_ELEMENT = 'qrcode';
-  var SETTINGS_SERVER_IP = 'remote-control.server-ip';
 
   var _ = navigator.mozL10n.get;
 
@@ -13,13 +12,10 @@
     this.sections = [];
     this.keyNav = null;
     this.ip = '';
-    this.observer = null;
   }
 
   App.prototype = {
     start: function() {
-      this.config = new Config();
-
       var sections = document.getElementsByTagName('section');
       Array.from(sections).forEach((dom) => {
         var id = dom.id;
@@ -45,62 +41,86 @@
       });
       this.keyNav.on('esc', this._handleBack.bind(this));
 
-      this.observer = (ip) => {
-        if (ip) {
-          this._updateIP(ip);
-        } else {
-          this._updateIP('127.0.0.1');
-        }
-      };
-      SettingsListener.observe(SETTINGS_SERVER_IP, '', this.observer);
+      this.config = new Config();
+      this.config.start();
+      this.config.once('ready', this._statusCheck.bind(this));
+      this.config.on('changed', this._onSettingsChanged.bind(this));
     },
 
     stop: function() {
-      SettingsListener.unobserve(SETTINGS_SERVER_IP, this.observer);
-      this.observer = null;
+      this.config.stop();
+      this.config = null;
 
       this.keyNav.uninit();
       this.keyNav = null;
+
       this.activeSection = '';
       this.sections = [];
-
-      this.config = null;
     },
 
-    _switchSection: function(section_id) {
-      if (!section_id) {
-        section_id = MAIN_SECTION;
+    _statusCheck: function() {
+      var setVisible = function(elemId, visible) {
+        var elem = document.getElementById(elemId);
+        if (visible) {
+          elem.classList.add('visible');
+        } else {
+          elem.classList.remove('visible');
+        }
+      };
+
+      var enabled = this.config.settings.enabled;
+      var hasConnection = !!this.ip;
+      setVisible('location', enabled && hasConnection);
+      setVisible('off-line-message', enabled && !hasConnection);
+      setVisible('disabled-message', !enabled);
+
+      var mainSection = this.sections[MAIN_SECTION];
+      if (enabled && hasConnection) {
+        mainSection.focus(document.getElementById(DEFAULT_ELEMENT));
+      } else {
+        mainSection.unfocus();
+        mainSection.focus();
+      }
+    },
+
+    _onSettingsChanged: function(name, value) {
+      switch(name) {
+        case 'server-ip':
+          this._updateIP(value);
+          break;
+      }
+      this._statusCheck();
+    },
+
+    _switchSection: function(sectionId) {
+      if (!sectionId) {
+        sectionId = MAIN_SECTION;
       }
       this.activeSection.hide();
-      this.activeSection = this.sections[section_id].show();
+      this.activeSection = this.sections[sectionId].show();
     },
 
     _updateIP: function(ip) {
       this.ip = ip;
       document.getElementById('ip').textContent = this.ip;
-      this._updateQRCode('qrcode-image');
+      this._updateQRCode('qrcode-image', 256, 256);
       this._updateQRCode('big-qrcode-image', 700, 700);
     },
 
     _updateQRCode: function(elemId, width, height) {
-      var div, rect;
-
       this._removeQRCode(elemId);
 
-      if (!width || !height) {
-        div = document.getElementById(elemId);
-        rect = div.getBoundingClientRect();
+      if (this.ip) {
+        /* jshint nonew: false */
+        new QRCode(elemId, {
+          text: 'http://' + this.ip + '/',
+          width: width,
+          height: height,
+          colorDark : '#000000',
+          colorLight : '#ffffff',
+          correctLevel : QRCode.CorrectLevel.L
+        });
       }
-
-      /* jshint nonew: false */
-      new QRCode(elemId, {
-        text: 'http://' + this.ip + '/',
-        width: width || rect.width,
-        height: height || rect.height,
-        colorDark : '#000000',
-        colorLight : '#ffffff',
-        correctLevel : QRCode.CorrectLevel.L
-      });
     },
 
     _removeQRCode: function(elemId) {
@@ -110,7 +130,7 @@
       }
     },
 
-    _handleClick: function(elem, section_id) {
+    _handleClick: function(elem, sectionId) {
       switch(elem.id) {
         case 'qrcode':
           this._switchSection('big-qrcode');
@@ -133,7 +153,8 @@
           break;
         case 'save-config':
           this.config.save();
-          this._switchSection();
+          // wait for settings change
+          setTimeout(this._switchSection.bind(this), 200);
           break;
       }
     },

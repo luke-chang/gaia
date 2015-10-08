@@ -15,7 +15,6 @@
     this._spatialNav = new SpatialNavigator(
       focusables,
       {
-        customHiddenClass: 'skip-spatial-navigation',
         ignoreHiddenElement: true,
         rememberSource: true
       }
@@ -30,11 +29,15 @@
     },
 
     focus: function(elem) {
-      this._spatialNav.focus(elem);
+      return this._spatialNav.focus(elem);
+    },
+
+    unfocus: function() {
+      return this._spatialNav.unfocus();
     },
 
     move: function(direction) {
-      this._spatialNav.move(direction);
+      return this._spatialNav.move(direction);
     },
 
     enter: function() {
@@ -51,10 +54,10 @@
       this._dom.classList.add('visible');
       this._dom.removeAttribute('aria-hidden');
 
-      var focusable = this._dom.querySelectorAll('.focusable');
+      /*var focusable = this._dom.querySelectorAll('.focusable');
       Array.from(focusable).forEach(function(elem) {
         elem.removeAttribute('aria-hidden');
-      });
+      });*/
 
       this._spatialNav.focus();
       this._active = true;
@@ -68,10 +71,10 @@
       this._dom.classList.remove('visible');
       this._dom.setAttribute('aria-hidden', true);
 
-      var focusable = this._dom.querySelectorAll('.focusable');
+      /*var focusable = this._dom.querySelectorAll('.focusable');
       Array.from(focusable).forEach(function(elem) {
         elem.setAttribute('aria-hidden', true);
-      });
+      });*/
     },
 
     _onFocus: function(elem) {
