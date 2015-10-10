@@ -1,4 +1,4 @@
-/* global AppWindowManager, ScreenManager, SettingsCache */
+/* global AppWindowManager, AppWindow, ScreenManager, SettingsCache */
 
 (function(exports) {
   'use strict';
@@ -145,6 +145,7 @@
                this._isUnderDOMTree(item.getElement()) &&
                this.isElementVisible(item.getElement());
       }.bind(this));
+      var target;
       if (visible.length > 0) {
         var topMost = null;
         // find the top most UI.
@@ -182,11 +183,15 @@
         }.bind(this));
         // focus top-most system UI
         topMost.focus();
+        target = topMost.CLASS_NAME;
       } else if (AppWindowManager.getActiveApp()){
         // no system UI, we set focus back to top-most AppWindow
         AppWindowManager.getActiveApp().focus();
+        target = AppWindow.CLASS_NAME;
         // We will always have active app, except booting.
       }
+      window.dispatchEvent(
+        new CustomEvent('focuschanged', {detail: { target: target }}));
     }.bind(this));
   };
 
