@@ -1,7 +1,16 @@
 'use strict';
 
 (function(exports) {
-  var DEBUG = false;
+  var DEBUG = true;
+
+  var defaultOptions = {
+    touchReportPeriod: 60,      // milliseconds
+    dblClickTimeThreshold: 250, // milliseconds
+    clickTimeThreshold: 200,    // milliseconds
+    clickMoveThreshold: 10,     // pixels
+    swipeMoveThreshold: 25,     // pixels
+    touchingClass: null         // CSS class
+  };
 
   function TouchPanel(touchPanel, options) {
     if (typeof options === 'function') {
@@ -12,16 +21,13 @@
       options = {};
     }
 
-    this.options = {
-      touchReportPeriod: options.touchReportPeriod || 60,          // ms
-      dblClickTimeThreshold: options.dblClickTimeThreshold || 250, // ms
-      clickTimeThreshold: options.clickTimeThreshold || 200,       // ms
-      clickMoveThreshold: options.clickMoveThreshold || 10,        // pixels
-      swipeMoveThreshold: options.swipeMoveThreshold || 25,        // pixels
-      touchingClass: options.touchingClass || null                 // class name
-    };
+    this.options = {};
+    for (var key in defaultOptions) {
+      this.options[key] = (typeof options[key] === 'undefined') ?
+        defaultOptions[key] : options[key];
+    }
 
-    if (options.handler) {
+    if (typeof options.handler === 'function') {
       this._handler = options.handler.bind(touchPanel);
     } else {
       this._handler = function(type, detail) {};
@@ -78,8 +84,8 @@
       var rect = this._domTouchPanel.getBoundingClientRect();
       this._panelX = Math.round(rect.left);
       this._panelY = Math.round(rect.top);
-      this._panelWidth = rect.width;
-      this._panelHeight = rect.height;
+      this._panelWidth = Math.round(rect.width);
+      this._panelHeight = Math.round(rect.height);
     },
 
     handleEvent: function(evt) {
@@ -149,6 +155,8 @@
     },
 
     onStart: function(x, y) {
+      document.activeElement.blur();
+
       if (this.options.touchingClass) {
         this._domTouchPanel.classList.add(this.options.touchingClass);
       }

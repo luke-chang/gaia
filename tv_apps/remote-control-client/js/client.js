@@ -80,6 +80,7 @@
     /* jshint nonew: false */
     new TouchPanel(document.getElementById('touch-panel'), {
       touchingClass: 'touching',
+      dblClickTimeThreshold: 0,
       handler: sendMessage
     });
 
