@@ -59,6 +59,10 @@
       }
     },
 
+    _setEnable: function(enabled) {
+      this._enabled = enabled;
+    },
+
     _handleRemoteControlEvent: function(detail) {
       switch(detail.action) {
         case 'request-control-mode':
@@ -71,10 +75,6 @@
           this._inputString(detail);
           break;
       }
-    },
-
-    _setEnable: function(enabled) {
-      this._enabled = enabled;
     },
 
     _fireControlModeChanged: function(isCursorMode, fireAnyway) {
