@@ -1,4 +1,4 @@
-/* global SettingsListener, AppWindowManager */
+/* global SettingsListener, AppWindowManager, KeyboardManager */
 'use strict';
 
 (function(exports) {
@@ -53,14 +53,22 @@
           this._fireControlModeChanged(isCursorMode);
           break;
         case 'mozChromeRemoteControlEvent':
-          this._handleRemoteControlEvent(evt.detail);
+          if (this._enabled) {
+            this._handleRemoteControlEvent(evt.detail);
+          }
       }
     },
 
-    _handleRemoteControlEvent: function(evt) {
-      switch(evt.type) {
+    _handleRemoteControlEvent: function(detail) {
+      switch(detail.action) {
         case 'request-control-mode':
           this._fireControlModeChanged(this._isCursorMode, true);
+          break;
+        case 'grant-input':
+          KeyboardManager.inputFrameManager.pauseTemporarily(detail.value);
+          break;
+        case 'input-string':
+          this._inputString(detail);
           break;
       }
     },
@@ -75,15 +83,38 @@
       }
       console.log('control-mode-changed: ' + isCursorMode);
       this._isCursorMode = isCursorMode;
-      var customEvent = new CustomEvent('mozContentEvent', {
+      window.dispatchEvent(new CustomEvent('mozContentEvent', {
         detail: {
           type: 'control-mode-changed',
           detail: {
             cursor: isCursorMode
           }
         }
-      });
-      window.dispatchEvent(customEvent);
+      }));
+    },
+
+    _inputString: function(detail) {
+      var mozIM = navigator.mozInputMethod;
+      var inputcontext = mozIM.inputcontext;
+      if (inputcontext) {
+        if (detail.clear) {
+          var lengthBeforeCursor = inputcontext.textBeforeCursor.length;
+          var lengthAfterCursor = inputcontext.textAfterCursor.length;
+          inputcontext.deleteSurroundingText(
+            -1 * lengthBeforeCursor,
+            lengthBeforeCursor + lengthAfterCursor
+          );
+        }
+
+        if (detail.string) {
+          inputcontext.setComposition(detail.string);
+          inputcontext.endComposition(detail.string);
+        }
+
+        if (detail.keycode) {
+          inputcontext.sendKey(detail.keycode);
+        }
+      }
     }
   };
 

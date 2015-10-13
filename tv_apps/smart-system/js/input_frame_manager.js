@@ -30,25 +30,15 @@
   };
 
   InputFrameManager.prototype.start = function ifm_start() {
-    window.addEventListener('remote-control-event', this);
+
   };
 
   InputFrameManager.prototype.stop = function ifm_stop() {
-    window.removeEventListener('remote-control-event', this);
+
   };
 
   InputFrameManager.prototype.handleEvent = function ifm_handleEvent(evt) {
-    switch (evt.type) {
-      case 'remote-control-event':
-        var detail = evt.detail;
-        if (detail.action != 'grant-input' || !this._activeFrame) {
-          return;
-        }
-        this._activeFrame.setInputMethodActive(!detail.value);
-        break;
-      default:
-        this._keyboardManager.resizeKeyboard(evt);
-    }
+    this._keyboardManager.resizeKeyboard(evt);
   };
 
   InputFrameManager.prototype.setupFrame = function ifm_setupFrame(layout) {
@@ -72,6 +62,13 @@
     frame.classList.add('hide');
     this._setFrameActive(frame, false);
     frame.removeEventListener('mozbrowserresize', this, true);
+  };
+
+  InputFrameManager.prototype.pauseTemporarily =
+    function ifm_pauseTemporarily(value) {
+    if (this._activeFrame) {
+      this._activeFrame.setInputMethodActive(!value);
+    }
   };
 
   InputFrameManager.prototype._setFrameActive =

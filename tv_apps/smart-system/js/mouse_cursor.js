@@ -4,7 +4,7 @@ window.addEventListener('load', function() {
   var cursor = document.getElementById('mouse-cursor');
   var timer;
 
-  window.addEventListener('remote-control-event', function(evt) {
+  window.addEventListener('mozChromeRemoteControlEvent', function(evt) {
     var detail = evt.detail;
     if (detail.action != 'move-cursor') {
       return;
