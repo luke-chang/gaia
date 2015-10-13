@@ -54,7 +54,14 @@
     input.addEventListener('keydown', function(evt) {
       switch(evt.keyCode) {
         case 13: //Enter
-          btnSend.click();
+          setTimeout(function() {
+            document.activeElement.blur();
+            sendMessage('input', {
+              clear: true,
+              string: input.value,
+              keycode: 13
+            });
+          });
           break;
         case 27: //Escape
           input.value = '';
@@ -69,12 +76,19 @@
       return false;
     });
 
-    btnSend.addEventListener('click', function() {
-      sendMessage('input', {
-        clear: true,
-        string: input.value
+    input.addEventListener('focus', function() {
+      setTimeout(function() {
+        input.select();
       });
-      input.select();
+    });
+
+    btnSend.addEventListener('click', function() {
+      setTimeout(function() {
+        sendMessage('input', {
+          clear: true,
+          string: input.value
+        });
+      });
     });
 
     /* jshint nonew: false */
