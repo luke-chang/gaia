@@ -2,5 +2,8 @@
  "dom.presentation.discoverable": true,
  "homescreen.appName": "smart-home",
   "sync.collections.bookmarks.enabled": true,
-  "sync.collections.history.enabled": false
+  "sync.collections.history.enabled": false,
+  "screen.timeout":0,
+  "remote-control.enabled": true,
+  "remote-control.pairing-required": true
 }
