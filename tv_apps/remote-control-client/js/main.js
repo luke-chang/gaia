@@ -85,11 +85,24 @@
     cookie.push(encodeURIComponent(String(key)) + '=' +
       encodeURIComponent(String(value)));
     if (typeof expires === 'number') {
-      cookie.push(new Date(Date.now() + expires * 864e+5).toUTCString());
+      cookie.push('expires=' +
+        new Date(Date.now() + expires * 864e+5).toUTCString());
     }
     if (path) {
       cookie.push('path=' + encodeURI(path));
     }
     document.cookie = cookie.join('; ');
+  };
+
+  exports.getCookie = function(key) {
+    var value;
+    document.cookie.split(/; */).some(function(cookie) {
+      var token = cookie.split('=');
+      if (decodeURIComponent(token[0]) === key) {
+        value = decodeURIComponent(token[1]);
+        return true;
+      }
+    });
+    return value;
   };
 }(window));

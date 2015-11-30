@@ -1,0 +1,42 @@
+{
+  "name": "base64-js",
+  "version": "1.0.0",
+  "homepage": "https://github.com/beatgammit/base64-js",
+  "authors": [
+    "T. Jameson Little <t.jameson.little@gmail.com>"
+  ],
+  "description": "Base64 encoding/decoding in pure JS",
+  "main": "lib/b64.js",
+  "moduleType": [
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "base64",
+    "b64",
+    "encode",
+    "decode",
+    "bytearray",
+    "typedarray",
+    "array",
+    "uint8array"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "bench",
+    "test",
+    "tests"
+  ],
+  "_release": "1.0.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.0",
+    "commit": "ccbe5642221d0cda6ab91b492a85ef7f25ad3b96"
+  },
+  "_source": "git://github.com/beatgammit/base64-js.git",
+  "_target": "*",
+  "_originalSource": "beatgammit/base64-js"
+}

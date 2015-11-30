@@ -29,6 +29,14 @@ body, section, input, div {
   border: 0;
 }
 
+.hidden {
+  display: none;
+}
+
+.error {
+  color: #e2443a;
+}
+
 /**********
  * Client *
  **********/
@@ -335,10 +343,6 @@ body.pairing {
   width: 284px;
 }
 
-#pairing-message.error {
-  color: #e2443a;
-}
-
 #pairing-button-area {
   width: 284px;
   margin: 0px auto 0 auto;
@@ -378,4 +382,24 @@ body.pairing {
 
 .pin-code-expired #restart-pairing {
   display: block;
+}
+
+/***********
+ * Secure *
+ ***********/
+
+#handshake-information-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: calc(100% - 24px);
+  margin-bottom: 24px;
+  color: #858585;
+  font-size: 17px;
+  text-align: center;
+}
+
+#handshake-information {
+  margin-bottom: 20px;
 }

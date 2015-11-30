@@ -6,3 +6,5 @@ bower_components/l20n/dist/node/
 bower_components/l20n/dist/tooling/
 bower_components/l20n/dist/web/
 bower_components/l20n/dist/webcompat/l20n.min.js
+bower_components/TextEncoderLite/test-lite.html
+bower_components/TextEncoderLite/util/

@@ -1,8 +1,12 @@
+/* global Secure */
 'use strict';
 
 (function(exports) {
   // The .sjs file is located in the Gecko since it needs chrome privilege.
   var AJAX_URL = 'pairing.sjs';
+
+  var secure;
+  var wrappedSymmetricKey;
 
   function init() {
     var btnSubmit = document.getElementById('connect');
@@ -17,7 +21,14 @@
       window.location.reload();
     });
 
-    btnSubmit.disabled = false;
+    btnSubmit.disabled = true;
+
+    secure = new Secure(AJAX_URL);
+    secure.handshake().then(function(base64WrappedSymmetricKey) {
+      wrappedSymmetricKey = base64WrappedSymmetricKey;
+      btnSubmit.disabled = false;
+    });
+
     btnSubmit.addEventListener('click', function(evt) {
       var pincode = pinCodeInput.getCodes();
       if (pincode === '') {
@@ -33,43 +44,72 @@
         showMessage(message, true);
       };
 
-      exports.sendMessage(
-        AJAX_URL,
-        {
-          message: JSON.stringify({ pincode: pincode })
-        },
-        function success(data) {
-          if (data) {
-            if (data.verified) {
-              document.l10n.formatValue('connect-success')
-                .then(function(value) {
-                  showMessage(value);
-                  // The cookie will be used by server via http header.
-                  exports.setCookie('uuid', data.uuid);
-                  setTimeout(function() {
-                    // Server will help redirecting to client.html when there is
-                    // a UUID in cookie.
-                    window.location.reload();
-                  }, 1000);
-                });
-            } else if (data.reason == 'expired') {
-              document.l10n.formatValue('pin-code-expired-message')
-                .then(onerror);
-              document.getElementById('pairing-container')
-                .classList.add('pin-code-expired');
-            } else {
-              document.l10n.formatValue('wrong-pin').then(onerror);
-            }
-          } else {
-            document.l10n.formatValue('connect-error-invalid-response')
-              .then(onerror);
-          }
-        },
-        function error(status) {
-          document.l10n.formatValue('connect-error', {status: String(status)})
-            .then(onerror);
+      pair(pincode).then(function(uuid) {
+        document.l10n.formatValue('connect-success').then(showMessage);
+
+        // The cookie will be used by server via http header.
+        exports.setCookie('uuid', uuid);
+        setTimeout(function() {
+          // Server will help redirecting to client.html when there is a UUID in
+          // cookie.
+          window.location.reload();
+        }, 1000);
+      }).catch(function(errorMessageL10n) {
+        if (typeof errorMessageL10n === 'string') {
+          errorMessageL10n = {
+            id: errorMessageL10n
+          };
         }
-      );
+        document.l10n.formatValue(errorMessageL10n.id, errorMessageL10n.args)
+          .then(onerror);
+      });
+    });
+  }
+
+  function pair(pincode) {
+    return new Promise(function(resolve, reject) {
+      secure.encrypt(pincode).then(function(encryptedPincode) {
+        var pairingData = {
+          pincode: encryptedPincode,
+          wrappedSymmetricKey: wrappedSymmetricKey
+        };
+
+        exports.sendMessage(
+          AJAX_URL,
+          {
+            message: JSON.stringify(pairingData)
+          },
+          function success(data) {
+            if (data) {
+              if (data.verified) {
+                secure.decrypt(data.uuid).then(function(uuid) {
+                  resolve(uuid);
+                }).catch(function() {
+                  reject('connect-error-invalid-response');
+                });
+              } else if (data.reason == 'expired') {
+                document.getElementById('pairing-container')
+                  .classList.add('pin-code-expired');
+                reject('pin-code-expired-message');
+              } else {
+                reject('wrong-pin');
+              }
+            } else {
+              reject('connect-error-invalid-response');
+            }
+          },
+          function error(status) {
+            reject({
+              id: 'connect-error',
+              args: {
+                status: String(status)
+              }
+            });
+          }
+        );
+      }).catch(function(err) {
+        reject('connect-error-invalid-response');
+      });
     });
   }
 
