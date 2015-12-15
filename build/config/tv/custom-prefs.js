@@ -19,3 +19,5 @@ user_pref("remotecontrol.service.pairing_required", true);
 // Remote control URL. Gecko loads its required static file in this app.
 user_pref("remotecontrol.client_page.prepath", "app://remote-control-client.gaiamobile.org");
 user_pref("remotecontrol.client_page.blacklist", "/client.html,/pairing.html");
+
+user_pref('layout.css.devPixelsPerPx', '1');
