@@ -33,6 +33,10 @@ body, section, input, div {
   display: none;
 }
 
+.success {
+  color: #00caf2;
+}
+
 .error {
   color: #e2443a;
 }
@@ -333,7 +337,6 @@ body.pairing {
 }
 
 #pairing-message {
-  color: #00caf2;
   font-size: 16px;
   font-weight: 300;
   font-style: italic;

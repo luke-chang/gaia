@@ -1,4 +1,4 @@
-/* global PanelElement */
+/* global Secure, PanelElement */
 'use strict';
 
 (function(exports) {
@@ -11,33 +11,44 @@
 
   var enabled = false;
   var inputStringSyncTimer = null;
+  var secure;
 
   function sendMessage(type, detail) {
     if (!enabled) {
       return;
     }
 
-    var data = {
-      type: type,
-      detail: (typeof detail === 'object') ? detail : detail.toString()
-    };
+    var sequence = localStorage.getItem('sequence-number');
+    if (isNaN(sequence)) {
+      sequence = 0;
+    }
+    localStorage.setItem('sequence-number', ++sequence);
 
-    exports.sendMessage(AJAX_URL, {
-      message: JSON.stringify(data)
-    }, function onsuccess(data) {
-      if (!data || !data.verified) {
-        enabled = false;
-        document.l10n.formatValue('session-expired').then(function(value) {
-          alert(value);
-          window.location.reload();
-        });
-      }
+    var message = JSON.stringify({
+      type: type,
+      detail: (typeof detail === 'object') ? detail : detail.toString(),
+      sequence: sequence
+    });
+
+    secure.encrypt(message).then(function(encryptedMessage) {
+      exports.sendMessage(AJAX_URL, {
+        message: encryptedMessage
+      }, function onsuccess(data) {
+        if (!data || !data.verified) {
+          enabled = false;
+          document.l10n.formatValue('session-expired').then(function(value) {
+            alert(value);
+            window.location.reload();
+          });
+        }
+      });
     });
   }
 
   function inputStringSyncHandler() {
     if (inputStringSyncTimer) {
-      clearTimeout(inputStringSyncTimer);
+      //clearTimeout(inputStringSyncTimer);
+      return;
     }
     inputStringSyncTimer = setTimeout(function() {
       inputStringSyncTimer = null;
@@ -63,6 +74,12 @@
   }
 
   function init() {
+    secure = new Secure();
+    secure.restore().catch(function(err) {
+      console.error(err);
+      window.location.reload();
+    });
+
     var input = document.getElementById('input-string');
     var btnSend = document.getElementById('send-string');
 

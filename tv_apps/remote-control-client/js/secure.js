@@ -15,13 +15,12 @@
   var RANDOM_VALUE_LENGTH = 12;
   var POLLING_PERIOD = 1000;
   var POLLING_MAX_COUNT = 30;
+  var UUID_EXPIRES = 91; // days
 
   var subtle = window.crypto.subtle ||
                window.crypto.webkitSubtle;
 
   function Secure() {}
-
-  Secure.UUID_EXPIRES = 90; // days
 
   Secure.prototype = {
     handshake: function() {
@@ -31,7 +30,24 @@
         .then(this.wrapSymmetricKey.bind(this))
         .then(this.sendSymmetricKey.bind(this))
         .then(this.pollUUID.bind(this))
-        .then(this.decrypt.bind(this));
+        .then(this.decrypt.bind(this))
+        .then(this.saveUUID.bind(this));
+    },
+
+    restore: function() {
+      var self = this;
+      return new Promise(function(resolve, reject) {
+        var uuid = exports.getCookie('uuid');
+        if (!uuid) {
+          reject('[Restore] No UUID!');
+        } else {
+          exports.setCookie('uuid', uuid, UUID_EXPIRES);
+          self.loadSymmetricKey().then(resolve).catch(function(err) {
+            exports.setCookie('uuid', null, -1);
+            reject(err);
+          });
+        }
+      });
     },
 
     requirePublicKey: function() {
@@ -129,14 +145,18 @@
     },
 
     loadSymmetricKey: function() {
-      var base64KeyData = localStorage.getItem('symmetric-key');
-      var keydata = base64js.toByteArray(base64KeyData);
-      var self = this;
-
+     var self = this;
       return new Promise(function(resolve, reject) {
+        var base64KeyData = localStorage.getItem('symmetric-key');
+
+        if (!base64KeyData) {
+          reject('[loadSymmetricKey] No symmetric key stored.');
+          return;
+        }
+
         subtle.importKey(
           'raw',
-          keydata,
+          base64js.toByteArray(base64KeyData),
           { name: 'AES-GCM' },
           true,
           ['encrypt', 'decrypt']
@@ -216,6 +236,7 @@
         (function pollingFunction() {
           if (++pollingCount > POLLING_MAX_COUNT) {
             reject('[pollUUID] Request timed out');
+            return;
           }
           exports.sendMessage(
             AJAX_URL,
@@ -242,6 +263,11 @@
           );
         })();
       });
+    },
+
+    saveUUID: function(uuid) {
+      exports.setCookie('uuid', uuid, UUID_EXPIRES);
+      return Promise.resolve();
     },
 
     encrypt: function(data) {

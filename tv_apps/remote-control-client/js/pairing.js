@@ -5,10 +5,18 @@
   // The .sjs file is located in the Gecko since it needs chrome privilege.
   var AJAX_URL = 'pairing.sjs';
 
+  var POLLING_PERIOD = 1000;
+  var POLLING_MAX_COUNT = 30;
+
   var secure;
-  var wrappedSymmetricKey;
 
   function init() {
+    secure = new Secure();
+    secure.restore().catch(function(err) {
+      console.error(err);
+      window.location.reload();
+    });
+
     var btnSubmit = document.getElementById('connect');
     var btnRestartPairing = document.getElementById('restart-pairing');
     var pinCodeInput = new PinCodeInput(
@@ -19,14 +27,6 @@
 
     btnRestartPairing.addEventListener('click', function() {
       window.location.reload();
-    });
-
-    btnSubmit.disabled = true;
-
-    secure = new Secure(AJAX_URL);
-    secure.handshake().then(function(base64WrappedSymmetricKey) {
-      wrappedSymmetricKey = base64WrappedSymmetricKey;
-      btnSubmit.disabled = false;
     });
 
     btnSubmit.addEventListener('click', function(evt) {
@@ -44,11 +44,8 @@
         showMessage(message, true);
       };
 
-      pair(pincode).then(function(uuid) {
+      pair(pincode).then(function() {
         document.l10n.formatValue('connect-success').then(showMessage);
-
-        // The cookie will be used by server via http header.
-        exports.setCookie('uuid', uuid);
         setTimeout(function() {
           // Server will help redirecting to client.html when there is a UUID in
           // cookie.
@@ -68,10 +65,10 @@
 
   function pair(pincode) {
     return new Promise(function(resolve, reject) {
-      secure.encrypt(pincode).then(function(encryptedPincode) {
+      secure.encrypt(pincode).then(function(encryptedPIN) {
         var pairingData = {
-          pincode: encryptedPincode,
-          wrappedSymmetricKey: wrappedSymmetricKey
+          action: 'pair-pincode',
+          encryptedPIN: encryptedPIN
         };
 
         exports.sendMessage(
@@ -80,20 +77,47 @@
             message: JSON.stringify(pairingData)
           },
           function success(data) {
-            if (data) {
-              if (data.verified) {
-                secure.decrypt(data.uuid).then(function(uuid) {
-                  resolve(uuid);
-                }).catch(function() {
-                  reject('connect-error-invalid-response');
-                });
-              } else if (data.reason == 'expired') {
-                document.getElementById('pairing-container')
-                  .classList.add('pin-code-expired');
-                reject('pin-code-expired-message');
-              } else {
-                reject('wrong-pin');
-              }
+            if (data && data.ticket) {
+              var ticket = data.ticket;
+              var pollingCount = 0;
+              (function pollingFunction() {
+                if (++pollingCount > POLLING_MAX_COUNT) {
+                  reject('Request timed out');
+                  return;
+                }
+                exports.sendMessage(
+                  AJAX_URL,
+                  {
+                    message: JSON.stringify({
+                      action: 'poll-pair-result',
+                      ticket: ticket
+                    })
+                  },
+                  function success(data) {
+                    if (data.done) {
+                      if (data.verified) {
+                        resolve();
+                      } else if (data.reason == 'expired') {
+                        document.getElementById('pairing-container')
+                          .classList.add('pin-code-expired');
+                        reject('pin-code-expired-message');
+                      } else {
+                        reject('wrong-pin');
+                      }
+                    } else {
+                      setTimeout(pollingFunction, POLLING_PERIOD);
+                    }
+                  },
+                  function error(status) {
+                    reject({
+                      id: 'connect-error',
+                      args: {
+                        status: String(status)
+                      }
+                    });
+                  }
+                );
+              })();
             } else {
               reject('connect-error-invalid-response');
             }
@@ -116,7 +140,13 @@
   function showMessage(message, isError) {
     var divMessage = document.getElementById('pairing-message');
     divMessage.textContent = message;
-    divMessage.classList[isError ? 'add' : 'remove']('error');
+    if (isError) {
+      divMessage.classList.add('error');
+      divMessage.classList.remove('success');
+    } else {
+      divMessage.classList.add('success');
+      divMessage.classList.remove('error');
+    }
   }
 
   function PinCodeInput(mask, codes, submitButton) {

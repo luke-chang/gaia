@@ -83,7 +83,7 @@
   exports.setCookie = function(key, value, expires, path) {
     var cookie = [];
     cookie.push(encodeURIComponent(String(key)) + '=' +
-      encodeURIComponent(String(value)));
+      encodeURIComponent(String(value || '')));
     if (typeof expires === 'number') {
       cookie.push('expires=' +
         new Date(Date.now() + expires * 864e+5).toUTCString());
