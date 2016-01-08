@@ -24,6 +24,7 @@
 
   Secure.prototype = {
     handshake: function() {
+      this.deleteUUID();
       return this.requirePublicKey()
         .then(this.importPublicKey.bind(this))
         .then(this.generateSymmetricKey.bind(this))
@@ -43,7 +44,7 @@
         } else {
           exports.setCookie('uuid', uuid, UUID_EXPIRES);
           self.loadSymmetricKey().then(resolve).catch(function(err) {
-            exports.setCookie('uuid', null, -1);
+            self.deleteUUID();
             reject(err);
           });
         }
@@ -268,6 +269,10 @@
     saveUUID: function(uuid) {
       exports.setCookie('uuid', uuid, UUID_EXPIRES);
       return Promise.resolve();
+    },
+
+    deleteUUID: function() {
+      exports.setCookie('uuid', null, -1);
     },
 
     encrypt: function(data) {
