@@ -891,6 +891,11 @@
       return true;
     }
 
+    // For tracking the downloadable browser app
+    if (app.origin === 'app://0077777700160002.myhomescreen.tv') {
+      return true;
+    }
+
     try {
       var url = new URL(app.manifestURL);
       return url.hostname.indexOf('gaiamobile.org') >= 0;
