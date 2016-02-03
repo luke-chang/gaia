@@ -93,6 +93,10 @@
         case 'pin-destroyed':
           this._destroyPIN();
           break;
+        case 'custom-action':
+          // Note: "detail.detail" falls through from the "custom" event. Be
+          // careful if handling since details of custom events are untrusted.
+          break;
       }
     },
 
