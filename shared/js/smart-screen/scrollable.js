@@ -1,4 +1,4 @@
-/* global evt, SpatialNavigator */
+/* global evt */
 
 (function(exports) {
   'use strict';
@@ -60,17 +60,15 @@
     this.leftMargin = param.leftMargin || DEFAULT_LEFT_MARGIN;
 
     this.itemClassName = param.itemClassName;
-    var items = Array.prototype.slice.call(
-                    this.listElem.getElementsByClassName(param.itemClassName));
+    //var items = Array.prototype.slice.call(
+    //              this.listElem.getElementsByClassName(param.itemClassName));
 
     this.listElem.addEventListener('transitionend', this);
 
-    var defaultItem = this.listElem.dataset.defaultItem;
-    this.spatialNavigator = new SpatialNavigator(items);
-    this.spatialNavigator.focus(
-              items.length > defaultItem ? items[defaultItem] : null);
-    this.spatialNavigator.on('focus', this.handleSelection.bind(this));
-    this.spatialNavigator.on('unfocus', this.handleUnfocus.bind(this));
+    //var defaultItem = this.listElem.dataset.defaultItem;
+
+    this.frameElem.addEventListener('focus', this, true);
+    this.frameElem.addEventListener('blur', this, true);
 
     this._setNodesPosition();
 
@@ -91,6 +89,9 @@
     CLASS_NAME: 'XScrollable',
 
     uninit: function(elem) {
+      this.frameElem.removeEventListener('blur', this, true);
+      this.frameElem.removeEventListener('focus', this, true);
+
       this.listElem.removeEventListener('transitionend', this);
     },
 
@@ -353,13 +354,20 @@
       return this.nodes[idx];
     },
 
-    handleSelection: function(itemElem) {
-      this.scrollTo(itemElem);
-      this.fire('focus', this, itemElem, this.getNodeFromItem(itemElem));
+    handleSelection: function(evt) {
+      var itemElem = evt.target;
+      if (itemElem.classList.contains(this.itemClassName)) {
+        this._currentFocusedElement = itemElem;
+        this.scrollTo(itemElem);
+        this.fire('focus', this, itemElem, this.getNodeFromItem(itemElem));
+      }
     },
 
-    handleUnfocus: function(itemElem) {
-      this.fire('unfocus', this, itemElem, this.getNodeFromItem(itemElem));
+    handleUnfocus: function(evt) {
+      var itemElem = evt.target;
+      if (itemElem.classList.contains(this.itemClassName)) {
+        this.fire('unfocus', this, itemElem, this.getNodeFromItem(itemElem));
+      }
     },
 
     addNode: function(nodeElem) {
@@ -368,8 +376,7 @@
         return false;
       }
       this.nodes.push(nodeElem);
-      if (this.spatialNavigator.add(itemElem) &&
-          !!this.listElem.appendChild(nodeElem)) {
+      if (!!this.listElem.appendChild(nodeElem)) {
         this._setNodePosition(this.nodes.length - 1);
         return true;
       }
@@ -391,20 +398,19 @@
         return false;
       }
 
-      var focus = this.spatialNavigator.getFocusedElement();
+      var focus = this.currentItem;
 
       // When the selected item is being removed, we set focus to next item.
       // If next item doesn't exist, we set focus to previous item.
       var newfocus = (focus == itemElem) ?
           this.getNextItem(focus) || this.getPrevItem(focus) :
           focus;
-      this.spatialNavigator.remove(itemElem);
       this.listElem.removeChild(node);
 
       this.nodes.splice(parseInt(node.dataset.idx, 10), 1);
       this._setNodesPosition();
 
-      this.spatialNavigator.focus(newfocus);
+      newfocus.focus();
       return true;
     },
 
@@ -416,8 +422,7 @@
 
       var newNodes = this.nodes.filter(function(node, oldindex) {
         if(indices.indexOf(oldindex) !== -1) {
-          var itemElem = this.getItemFromNode(node);
-          this.spatialNavigator.remove(itemElem);
+          //var itemElem = this.getItemFromNode(node);
           this.listElem.removeChild(node);
           return false;
         }
@@ -442,7 +447,7 @@
         // is not empty after removing nodes,
         // reset node positions and the next focus item.
         this._setNodesPosition();
-        this.spatialNavigator.focus(newFocus);
+        newFocus.focus();
       } else if (isRemovingHoveringItem) {
         // In case of hovering, we only remove the hovering item.
         // When the removed node was hovering over a folder, after it's removed,
@@ -475,7 +480,6 @@
       this.listElem.appendChild(newNode);
       this._setNodePosition(newIdx);
 
-      this.spatialNavigator.add(itemElem);
       if (this.refElem) {
         this.realignToReferenceElement();
         this._shiftNodesPosition(1, newIdx);
@@ -502,7 +506,6 @@
       this.listElem.appendChild(newNode);
       this._setNodesPosition();
 
-      this.spatialNavigator.add(itemElem);
       this.hover(itemElem, this.getItemFromNode(startNode));
       this.focus(newIdx);
       this._slide(this.getItemFromNode(startNode), newIdx + 1);
@@ -512,12 +515,11 @@
     },
 
     get currentItem() {
-      return this.spatialNavigator.getFocusedElement();
+      return this._currentFocusedElement;
     },
 
     get currentIndex() {
-      return this.nodes.indexOf(
-        this.getNodeFromItem(this.spatialNavigator.getFocusedElement()));
+      return this.nodes.indexOf(this.getNodeFromItem(this.currentItem));
     },
 
     get length() {
@@ -681,22 +683,16 @@
       } else if (typeof item === 'undefined') {
         item = this.currentItem || 0;
       }
-      this.spatialNavigator.focus(item);
+      if (item) {
+        item.focus();
+      }
     },
 
     silentFocus: function(item) {
-      this.spatialNavigator.silent = true;
       this.focus(item);
-      this.spatialNavigator.silent = false;
-    },
-
-    move: function(direction) {
-      return this.spatialNavigator.move(direction);
     },
 
     clean: function() {
-      this.spatialNavigator.setCollection();
-      this.spatialNavigator.unfocus();
       this.listElem.innerHTML = '';
       this.nodes.length = 0;
     },
@@ -706,16 +702,25 @@
     },
 
     handleEvent: function (evt) {
-      if (evt.type === 'transitionend') {
-        if (evt.target === this.listElem && evt.propertyName === 'transform') {
-          if (this.isSliding) {
-            this.endSlide();
+      switch (evt.type) {
+        case 'transitionend':
+          if (evt.target === this.listElem &&
+              evt.propertyName === 'transform') {
+            if (this.isSliding) {
+              this.endSlide();
+            }
+            this.fire('listTransformEnd', this.listElem);
+          } else if (evt.target.classList.contains('card') &&
+              evt.propertyName === 'transform') {
+            this.fire('nodeTransformEnd', evt.target);
           }
-          this.fire('listTransformEnd', this.listElem);
-        } else if (evt.target.classList.contains('card') &&
-            evt.propertyName === 'transform') {
-          this.fire('nodeTransformEnd', evt.target);
-        }
+          break;
+        case 'focus':
+          this.handleSelection(evt);
+          break;
+        case 'blur':
+          this.handleUnfocus(evt);
+          break;
       }
     },
 

@@ -1,8 +1,8 @@
 'use strict';
 /* global Application, FilterManager, CardManager, Clock, Deck, Edit, Folder,
-          KeyNavigationAdapter, MessageHandler, MozActivity, SearchBar,
-          SharedUtils, SpatialNavigator, URL, XScrollable, Animations,
-          Utils, FTEWizard, AppBookmark */
+          MessageHandler, MozActivity, SearchBar, SharedUtils, SpatialNavigator,
+          URL, XScrollable, Animations, Utils, FTEWizard, AppBookmark,
+          SpatialNavigation */
 /* jshint nonew: false */
 
 (function(exports) {
@@ -20,20 +20,7 @@
   function Home() {}
 
   Home.prototype = {
-    navigableIds:
-        ['search-button', 'search-input', 'edit-button', 'settings-button',
-            'filter-all-button', 'filter-tv-button', 'filter-app-button',
-            'filter-device-button', 'filter-website-button'],
-
-    topElementIds: ['search-button', 'search-input', 'edit-button',
-            'settings-button'],
-
-    bottomElementIds: ['filter-tab-group', 'filter-all-button',
-        'filter-tv-button', 'filter-device-button', 'filter-app-button',
-        'filter-website-button'],
-
     isNavigable: true,
-    navigableClasses: ['filter-tab', 'command-button'],
     navigableScrollable: [],
     cardScrollable: undefined,
     folderScrollable: undefined,
@@ -54,6 +41,42 @@
     timeElem: document.getElementById('time'),
     fteElem: document.getElementById('fte'),
 
+    sections: {
+      'header': {
+        selector:
+          '#main-section:not([data-mode=edit]) #header-buttons smart-button,' +
+          '#search-input',
+        straightOnly: true,
+        leaveFor: {
+          'down': '@card-list'
+        },
+        enterTo: 'default-element',
+        defaultElement: '#search-button'
+      },
+      'card-list': {
+        selector: '#card-list-frame .app-button',
+        leaveFor: {
+          'left': '',
+          'right': ''
+        },
+        enterTo: 'last-focused',
+        defaultElement: '#card-list-frame .app-button:first-child'
+      },
+      'folder-list': {
+        selector: '#folder-list-frame .app-button',
+        enterTo: 'last-focused',
+        defaultElement: '#folder-list-frame .app-button:first-child'
+      },
+      'filter': {
+        selector: '#filter-tab-group smart-button',
+        straightOnly: true,
+        leaveFor: {
+          'up': '@card-list'
+        },
+        enterTo: 'default-element',
+        defaultElement: '#filter-all-button'
+      }
+    },
 
     init: function() {
       var that = this;
@@ -88,17 +111,18 @@
                 referenceElement: that.cardScrollable});
 
         that.navigableScrollable = [that.cardScrollable, that.folderScrollable];
-        var collection = that._getNavigateElements();
 
-        that.spatialNavigator = new SpatialNavigator(collection);
-        that.spatialNavigator.straightOnly = true;
+        that.spatialNavigator = new SpatialNavigator();
 
-        that.keyNavigatorAdapter = new KeyNavigationAdapter();
-        that.keyNavigatorAdapter.init();
-        that.keyNavigatorAdapter.on('move', that.onMove.bind(that));
-        // All behaviors which no need to have multple events while holding
-        // the key should use keyup.
-        that.keyNavigatorAdapter.on('enter-keyup', that.onEnter.bind(that));
+        SpatialNavigation.init();
+        for (var sectionId in that.sections) {
+          SpatialNavigation.add(sectionId, that.sections[sectionId]);
+        }
+        SpatialNavigation.focus('card-list');
+
+        window.addEventListener('sn:enter-up', that.onEnter.bind(that));
+        window.addEventListener('sn:willfocus', that.handleFocus.bind(that));
+        window.addEventListener('sn:unfocused', that.handleUnfocus.bind(that));
 
         that.cardListElem.addEventListener('transitionend',
                                       that.determineFolderExpand.bind(that));
@@ -109,8 +133,6 @@
                           that.onCardRemoved.bind(that, that.cardScrollable));
         that.cardManager.on('card-updated', that.onCardUpdated.bind(that));
 
-        that.spatialNavigator.on('focus', that.handleFocus.bind(that));
-        that.spatialNavigator.on('unfocus', that.handleUnfocus.bind(that));
         var handleCardFocusBound = that.handleCardFocus.bind(that);
         var handleCardUnfocusBound = that.handleCardUnfocus.bind(that);
         var handleCardUnhoverBound = that.handleCardUnhover.bind(that);
@@ -119,9 +141,6 @@
           scrollable.on('focus', handleCardFocusBound);
           scrollable.on('unfocus', handleCardUnfocusBound);
           scrollable.on('unhover', handleCardUnhoverBound);
-          if (scrollable.isEmpty()) {
-            that.spatialNavigator.remove(scrollable);
-          }
         });
 
         that.edit = new Edit();
@@ -171,7 +190,7 @@
         that._fteWizard.init({
           container: that.fteElem,
           onfinish: () => {
-            that.spatialNavigator.focus(that.cardScrollable);
+            SpatialNavigation.focus('card-list');
             that.isNavigable = true;
           }
         });
@@ -201,7 +220,7 @@
           if (that._fteWizard.running) {
             that._fteWizard.focus();
           } else if (!that.messageHandler.resumeActivity()) {
-            that.spatialNavigator.focus();
+            SpatialNavigation.focus();
           }
 
           that.isNavigable = true;
@@ -508,24 +527,12 @@
       }.bind(this));
     },
 
-    onMove: function(key) {
-      if (!this.isNavigable || this.edit.onMove(key)) {
+    onEnter: function(evt) {
+      if (!this.isNavigable || this.edit.onEnter(evt)) {
         return;
       }
 
-      var focus = this.spatialNavigator.getFocusedElement();
-
-      if (!(focus.CLASS_NAME == 'XScrollable' && focus.move(key))) {
-        this.spatialNavigator.move(key);
-      }
-    },
-
-    onEnter: function() {
-      if (!this.isNavigable || this.edit.onEnter()) {
-        return;
-      }
-
-      var focusElem = this.focusElem;
+      var focusElem = evt.target;
 
       if (focusElem === this.settingsButton) {
         this.openSettings();
@@ -541,7 +548,7 @@
         // Current focus is on a card
         var cardId = focusElem.dataset.cardId;
         var card;
-        if (this.focusScrollable === this.folderScrollable) {
+        if (this._focusScrollable === this.folderScrollable) {
           card = this._folderCard.findCard({cardId: cardId});
         } else {
           card = this.cardManager.findCardFromCardList({cardId: cardId});
@@ -572,30 +579,11 @@
       this.searchButton.classList.remove('hidden');
     },
 
-    _getNavigateElements: function() {
-      var elements = [];
-      this.navigableIds.forEach(function(id) {
-        var elem = document.getElementById(id);
-        if (elem) {
-          elements.push(elem);
-        }
-      });
-      this.navigableClasses.forEach(function(className) {
-        var elems = document.getElementsByClassName(className);
-        if (elems.length) {
-          // Change HTMLCollection to array before concatenating
-          elements = elements.concat(Array.prototype.slice.call(elems));
-        }
-      });
-      elements = elements.concat(this.navigableScrollable);
-      return elements;
-    },
-
-    handleFocus: function(elem) {
+    handleFocus: function(evt) {
+      var elem = evt.target;
       if (elem.CLASS_NAME == 'XScrollable') {
         this._focusScrollable = elem;
         elem.focus();
-        this.checkFocusedGroup();
       } else if (elem.nodeName) {
         if (this._focus) {
           this._focus.blur();
@@ -604,28 +592,16 @@
         elem.focus();
         this._focus = elem;
         this._focusScrollable = undefined;
-        this.checkFocusedGroup(elem);
       } else {
         this._focusScrollable = undefined;
       }
     },
 
-    handleUnfocus: function(elem, nodeElem) {
+    handleUnfocus: function(evt) {
+      var elem = evt.target;
       if(elem.CLASS_NAME == 'XScrollable') {
         this.handleCardUnfocus(
                 elem, elem.currentItem, elem.getNodeFromItem(elem.currentItem));
-      }
-    },
-
-    checkFocusedGroup: function(elem) {
-      if (!this._focusedGroup) {
-        return;
-      }
-
-      // close the focused group when we move focus out of this group.
-      if (!elem || !this._focusedGroup.contains(elem)) {
-        this._focusedGroup.close();
-        this._focusedGroup = null;
       }
     },
 
@@ -647,9 +623,10 @@
     cleanFolderScrollable: function(doNotChangeFocus) {
       if (this._focusScrollable === this.folderScrollable &&
           !doNotChangeFocus) {
-        this.spatialNavigator.focus(this.cardScrollable);
+        //this.spatialNavigator.focus(this.cardScrollable);
+        SpatialNavigation.focus('card-list');
       }
-      this.spatialNavigator.remove(this.folderScrollable);
+      //this.spatialNavigator.remove(this.folderScrollable);
       this.folderScrollable.clean();
       this._folderCard = undefined;
       this.edit.isFolderReady = false;
@@ -671,7 +648,7 @@
       // Folder expansion is performed on only when user moves cursor onto a
       // folder or hover a folder in edit mode and it finished its focus
       // transition.
-      if (this.focusScrollable === this.cardScrollable &&
+      if (this._focusScrollable === this.cardScrollable &&
         evt.originalTarget.classList.contains('app-button') &&
         (!this._folderCard ||
           this._folderCard.cardId !== evt.originalTarget.dataset.cardId) &&
@@ -721,7 +698,7 @@
           this.folderScrollable.realignToReferenceElement();
           this.skipFolderBubble = Animations.doBubbleAnimation(
                         this.folderListElem, '.app-button', 100, function() {
-              this.spatialNavigator.add(this.folderScrollable);
+              //this.spatialNavigator.add(this.folderScrollable);
               this.edit.isFolderReady = true;
               this.skipFolderBubble = undefined;
             }.bind(this));
@@ -772,14 +749,6 @@
     restartClock: function() {
       this.clock.stop();
       this.clock.start(this.updateClock.bind(this));
-    },
-
-    get focusElem() {
-      return this._focus;
-    },
-
-    get focusScrollable() {
-      return this._focusScrollable;
     }
   };
 

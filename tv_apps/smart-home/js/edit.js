@@ -1,4 +1,4 @@
-/* global evt, Folder, SmartModalDialog, Utils */
+/* global evt, Folder, SmartModalDialog, Utils, SpatialNavigation */
 
 'use strict';
 
@@ -57,8 +57,19 @@
       this.cardScrollable.on('node-inserted-over-folder',
         this.onNodeInsertedOverFolder.bind(this));
 
-      this.spatialNavigator.on('focus', this.handleFocus.bind(this));
-      this.spatialNavigator.on('unfocus', this.handleUnfocus.bind(this));
+      //this.spatialNavigator.on('focus', this.handleFocus.bind(this));
+      //this.spatialNavigator.on('unfocus', this.handleUnfocus.bind(this));
+
+      cardScrollable.frameElem.addEventListener('focus',
+        this.handleFocus.bind(this, cardScrollable), true);
+
+      SpatialNavigation.add('edit-header', {
+        selector: '#main-section[data-mode=edit] #edit-menu smart-button',
+        straightOnly: true
+      });
+
+      cardScrollable.frameElem
+        .addEventListener('keydown', this.onMove.bind(this));
 
       // A workaround for checking if the folder list is navigable
       this.isFolderReady = false;
@@ -73,8 +84,6 @@
     toggleEditMode: function() {
       if (this.mainSection.dataset.mode === 'edit') {
         this.mainSection.dataset.mode = '';
-        this.spatialNavigator.multiAdd(this.regularNavElements);
-        this.spatialNavigator.multiRemove(this.editNavElements);
         this.cardScrollable.setScale();
         this.folderScrollable.setScale();
         this.cardScrollable.listElem.classList.add('exiting-edit-mode');
@@ -83,22 +92,20 @@
             // Since writeCardlistInCardStore triggers card-removed event that
             // causes re-focus on other elements in card list, we need to wait
             // until those actions to be done before focusing editButton.
-            this.spatialNavigator.focus(this.editButton);
+            this.editButton.focus();
             this.currentNode.classList.remove('focused');
           }.bind(this));
         this._concealPanel(this.currentScrollable, this.currentNode);
         this.fire('exit-edit-mode');
       } else {
         this.mainSection.dataset.mode = 'edit';
-        this.spatialNavigator.multiRemove(this.regularNavElements);
-        this.spatialNavigator.multiAdd(this.editNavElements);
 
         this._setCurrentScrollable(this.cardScrollable);
         this.currentNode =
           this.cardScrollable.getNodeFromItem(this.cardScrollable.currentItem);
         this._revealPanel(this.currentScrollable, this.currentNode);
 
-        this.spatialNavigator.focus(this.cardScrollable);
+        SpatialNavigation.focus('card-list');
         this.cardScrollable.setScale(EDIT_MODE_SCALE);
         this.folderScrollable.setScale(EDIT_MODE_SCALE);
         this.fire('enter-edit-mode');
@@ -156,9 +163,9 @@
     },
 
     _consumeMove: function() {
-      var focus = this.spatialNavigator.getFocusedElement();
+      var focus = this.cardScrollable;
 
-      if (!this._moveQueue.isEmpty() && focus.CLASS_NAME === 'XScrollable') {
+      if (!this._moveQueue.isEmpty()) {
         var key = this._moveQueue.shift();
         var targetItem = focus.getTargetItem(key);
 
@@ -244,17 +251,24 @@
       this._setHintArrow();
     },
 
-    onMove: function(key) {
+    onMove: function(evt) {
+      if (evt.keyCode < 37 || evt.keyCode > 40) {
+        return;
+      }
+
       if (this.modalDialog.isOpened) {
-        return true;
+        evt.stopPropagation();
+        return;
       }
 
       if (this.mode !== 'arrange') {
-        return false;
+        return;
       }
+
+      var key = evt.key.substr(5).toLowerCase();
       this._produceMove(key);
 
-      return true;
+      evt.stopPropagation();
     },
 
     _setHintArrow: function(scrollable) {
@@ -291,7 +305,8 @@
       var folder = this.cardManager.insertNewFolder({id: 'new-folder'},
         this.cardScrollable.currentIndex);
       folder.on('card-swapped', this.onCardSwapped.bind(this));
-      this.spatialNavigator.focus(this.cardScrollable);
+      SpatialNavigation.focus('card-list');
+      //this.spatialNavigator.focus(this.cardScrollable);
     },
 
     moveToFolder: function() {
@@ -352,7 +367,7 @@
       this.folderScrollable.realignToReferenceElement();
     },
 
-    onEnter: function() {
+    onEnter: function(evt) {
       if (this.mode !== 'edit' && this.mode !== 'arrange') {
         return false;
       }
@@ -361,13 +376,17 @@
         return true;
       }
 
-      var focus = this.spatialNavigator.getFocusedElement();
+      var focus = evt.target;
       if (focus === this.doneButton) {
         this.toggleEditMode();
       } else if (focus === this.addNewFolderButton) {
         this.addNewFolder();
-      } else if (focus.CLASS_NAME === 'XScrollable') {
-        var currentItem = focus.currentItem;
+      } else if (focus.classList.contains('app-button')) {
+        if (!focus.classList.contains('hover')) {
+          this.toggleArrangeMode();
+        }
+      } else {
+        /*var currentItem = focus.currentItem;
 
         if (currentItem.classList.contains('rename-btn')) {
           this.renameCard(focus, focus.getNodeFromItem(currentItem));
@@ -378,7 +397,7 @@
         } else {
           // Current focus is on a card
           this.toggleArrangeMode();
-        }
+        }*/
       }
       return true;
     },
@@ -487,20 +506,20 @@
     },
 
     _revealPanel: function(scrollable, nodeElem) {
-      var panel = this._getPanel(nodeElem);
+      /*var panel = this._getPanel(nodeElem);
       if(scrollable.getItemFromNode(nodeElem).getAttribute('app-type') ===
                                                                   'deck') {
         // Decks can't be renamed or deleted.
         return;
       }
       scrollable.spatialNavigator.add(panel.renameBtn);
-      scrollable.spatialNavigator.add(panel.deleteBtn);
+      scrollable.spatialNavigator.add(panel.deleteBtn);*/
     },
 
     _concealPanel: function(scrollable, nodeElem) {
-      var panel = this._getPanel(nodeElem);
-      scrollable.spatialNavigator.remove(panel.renameBtn);
-      scrollable.spatialNavigator.remove(panel.deleteBtn);
+      //var panel = this._getPanel(nodeElem);
+      //scrollable.spatialNavigator.remove(panel.renameBtn);
+      //scrollable.spatialNavigator.remove(panel.deleteBtn);
     },
 
     handleFocus: function(elem) {
