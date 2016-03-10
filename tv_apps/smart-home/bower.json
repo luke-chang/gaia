@@ -19,6 +19,7 @@
     "smart-icons": "smart-components/smart-icons#~0.0.2",
     "smart-bubbles": "smart-components/smart-bubbles",
     "smart-dialog": "smart-components/smart-dialog",
-    "smart-modal-dialog": "smart-components/smart-modal-dialog"
+    "smart-modal-dialog": "smart-components/smart-modal-dialog",
+    "js-spatial-navigation": "luke-chang/js-spatial-navigation"
   }
 }
