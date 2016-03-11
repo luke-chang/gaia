@@ -32,7 +32,7 @@
         .then(this.pollUUID.bind(this))
         .then(this.decrypt.bind(this))
         .then(this.saveUUID.bind(this))
-        .then(this.getNextURL.bind(this));
+        .then(this.checkNeedPair.bind(this));
     },
 
     restore: function() {
@@ -339,20 +339,20 @@
       });
     },
 
-    getNextURL: function() {
+    checkNeedPair: function() {
       return new Promise(function(resolve, reject) {
         exports.sendMessage(
           AJAX_URL,
           {
             message: JSON.stringify({
-              action: 'get-next-url'
+              action: 'need-pair'
             })
           },
           function success(data) {
-            resolve(data.url);
+            resolve(data.pair);
           },
           function error(status) {
-            reject('[getNextURL] ' + status);
+            reject('[checkNeedPair] ' + status);
           }
         );
       });
