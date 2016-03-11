@@ -4,8 +4,7 @@
 (function(exports) {
   var DEBUG = false;
 
-  // The .sjs file is located in the Gecko since it needs chrome privilege.
-  var AJAX_URL = 'secure.sjs';
+  var AJAX_URL = exports.generateURL('/secure.sjs');
 
   var RSA_OPTION = {
     name: 'RSA-OAEP',
@@ -32,7 +31,8 @@
         .then(this.sendSymmetricKey.bind(this))
         .then(this.pollUUID.bind(this))
         .then(this.decrypt.bind(this))
-        .then(this.saveUUID.bind(this));
+        .then(this.saveUUID.bind(this))
+        .then(this.getNextURL.bind(this));
     },
 
     restore: function() {
@@ -336,6 +336,25 @@
         .catch(function(err){
           reject('[decrypt] ' + err);
         });
+      });
+    },
+
+    getNextURL: function() {
+      return new Promise(function(resolve, reject) {
+        exports.sendMessage(
+          AJAX_URL,
+          {
+            message: JSON.stringify({
+              action: 'get-next-url'
+            })
+          },
+          function success(data) {
+            resolve(data.url);
+          },
+          function error(status) {
+            reject('[getNextURL] ' + status);
+          }
+        );
       });
     }
   };

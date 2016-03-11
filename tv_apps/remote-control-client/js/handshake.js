@@ -6,8 +6,8 @@
     exports.setCookie('uuid', '', -1);
 
     var secure = new Secure();
-    secure.handshake().then(function() {
-      window.location.reload();
+    secure.handshake().then(function(nextURL) {
+      window.location.href = nextURL;
     }).catch(function(err) {
       var divMessage = document.getElementById('handshake-information');
       divMessage.textContent = '[ERROR]' + err;

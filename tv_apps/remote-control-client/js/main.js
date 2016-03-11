@@ -3,6 +3,8 @@
 (function(exports) {
   var DEBUG = false;
 
+  var XHRPort = 8080;
+
   // Polyfill for Safari
   if (!navigator.languages) {
     var language = navigator.language.split('-', 2);
@@ -15,6 +17,11 @@
     }
     navigator.languages = [language];
   }
+
+  exports.generateURL = function(path) {
+    return window.location.protocol + '//' +
+           window.location.hostname + ':' + XHRPort + path;
+  };
 
   exports.ready = function(handler) {
     var handled = false;

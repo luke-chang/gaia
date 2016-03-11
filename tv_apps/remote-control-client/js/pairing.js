@@ -2,8 +2,7 @@
 'use strict';
 
 (function(exports) {
-  // The .sjs file is located in the Gecko since it needs chrome privilege.
-  var AJAX_URL = 'pairing.sjs';
+  var AJAX_URL = exports.generateURL('/pairing.sjs');
 
   var POLLING_PERIOD = 1000;
   var POLLING_MAX_COUNT = 30;
@@ -14,7 +13,7 @@
     secure = new Secure();
     secure.restore().catch(function(err) {
       console.error(err);
-      window.location.reload();
+      window.location.href = 'secure.html';
     });
 
     var btnSubmit = document.getElementById('connect');
@@ -47,9 +46,7 @@
       pair(pincode).then(function() {
         document.l10n.formatValue('connect-success').then(showMessage);
         setTimeout(function() {
-          // Server will help redirecting to client.html when there is a UUID in
-          // cookie.
-          window.location.reload();
+          window.location.href = 'client.html';
         }, 1000);
       }).catch(function(errorMessageL10n) {
         if (typeof errorMessageL10n === 'string') {

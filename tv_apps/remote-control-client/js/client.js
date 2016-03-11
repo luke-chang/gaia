@@ -2,8 +2,7 @@
 'use strict';
 
 (function(exports) {
-  // The .sjs file is located in the Gecko since it needs chrome privilege.
-  var AJAX_URL = 'client.sjs';
+  var AJAX_URL = exports.generateURL('/client.sjs');
 
   // The client will send the currently-inputed string to server automatically
   // whenever a user stops typing for the specified period.
@@ -38,7 +37,7 @@
           enabled = false;
           document.l10n.formatValue('session-expired').then(function(value) {
             alert(value);
-            window.location.reload();
+            window.location.href = 'secure.html';
           });
         }
       });
@@ -77,7 +76,7 @@
     secure = new Secure();
     secure.restore().catch(function(err) {
       console.error(err);
-      window.location.reload();
+      window.location.href = 'secure.html';
     });
 
     var input = document.getElementById('input-string');
