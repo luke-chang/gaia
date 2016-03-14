@@ -16,6 +16,10 @@
       window.location.href = 'secure.html';
     });
 
+    exports.sendMessage(AJAX_URL, {
+      message: JSON.stringify({ action: 'request-show-pincode' })
+    });
+
     var btnSubmit = document.getElementById('connect');
     var btnRestartPairing = document.getElementById('restart-pairing');
     var pinCodeInput = new PinCodeInput(
