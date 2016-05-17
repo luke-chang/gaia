@@ -382,6 +382,8 @@
       } else {
         scrollable.insertNodeOver(newCardElem, idx);
       }
+
+      this.onCardListLengthChanged();
     },
 
     onCardUpdated: function(scrollable, card, idx) {
@@ -417,6 +419,16 @@
         // refresh the position of folderScrollable in this.
         this.folderScrollable.realignToReferenceElement();
       }
+
+      this.onCardListLengthChanged();
+    },
+
+    onCardListLengthChanged: function() {
+      console.log('0');
+      this.cardManager.getCardList().then(cardList => {
+        console.log('3');
+        console.log(cardList);
+      });
     },
 
     onArrangeMode: function() {
